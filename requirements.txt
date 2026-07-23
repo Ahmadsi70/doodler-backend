@@ -37,7 +37,7 @@ gTTS>=2.5
 ffmpeg-python>=0.2.0
 
 # ── Text / NLP ──
-hazm>=3.0.0
+hazm>=0.10.0
 sentence-transformers>=3.0.0
 
 # ── Cache ──
