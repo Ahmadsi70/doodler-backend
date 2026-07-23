@@ -1,0 +1,13 @@
+{
+  "source": "story_standalone",
+  "domains": [
+    {
+      "id": "cinematic_shot",
+      "label": "Cinematic",
+      "engine_test": "story_hero",
+      "studios": [
+        "studio_story"
+      ]
+    }
+  ]
+}

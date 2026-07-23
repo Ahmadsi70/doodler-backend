@@ -1,0 +1,92 @@
+[
+  {
+    "pattern_id": "AP_001",
+    "name": "Visual Run-on Sentence",
+    "description": "Cramming multiple conflicting actions into one shot without cutting.",
+    "fix": "Cut the action into separate shots, assigning one dramatic verb per shot."
+  },
+  {
+    "pattern_id": "AP_002",
+    "name": "Talking Heads",
+    "description": "Characters delivering dialogue statically without physical subtext.",
+    "fix": "Assign a physical task or line of action that reveals the character's internal emotion."
+  },
+  {
+    "pattern_id": "AP_003",
+    "name": "Twinning",
+    "description": "Perfectly symmetrical arms, legs, or facial features in an extreme pose.",
+    "fix": "Offset timing by 2-4 frames or break symmetry to shift weight to one side."
+  },
+  {
+    "pattern_id": "AP_004",
+    "name": "Missing the Recoil (Weightless)",
+    "description": "Character moves linearly from contact to passing without a Down breakdown.",
+    "fix": "Insert a Down breakdown pose where gravity compresses the character's mass."
+  },
+  {
+    "pattern_id": "AP_005",
+    "name": "Unmotivated Camera Roaming",
+    "description": "Camera drifts or spins without being driven by character motion or story reveal.",
+    "fix": "Lock the camera down. Only pan/truck if the character moves or a new narrative clue must be revealed."
+  },
+  {
+    "pattern_id": "AP_006",
+    "name": "Dead Holds",
+    "description": "Frozen extremes with no life in the hold.",
+    "fix": "Use an 8-12 frame minimum moving hold after major poses."
+  },
+  {
+    "pattern_id": "AP_007",
+    "name": "Straight-Line Paths",
+    "description": "Wrists, nose, or hips travel in mechanical straight lines.",
+    "fix": "Rebuild inbetweens so primary masses travel on arcs."
+  },
+  {
+    "pattern_id": "AP_008",
+    "name": "No Anticipation",
+    "description": "Fast hits arrive without wind-up, so actions feel abrupt and weightless.",
+    "fix": "Add proportional anticipation before 1-3 frame accents."
+  },
+  {
+    "pattern_id": "AP_009",
+    "name": "No Cushioning",
+    "description": "Actions stop with linear mechanical inbetweens and no settle.",
+    "fix": "Ease out into aftermath with cushion frames."
+  },
+  {
+    "pattern_id": "AP_010",
+    "name": "Late Eyes",
+    "description": "Head turns before the eyes, so thought does not read.",
+    "fix": "Lead with eyes/eyelids 2-4 frames before the head."
+  },
+  {
+    "pattern_id": "AP_011",
+    "name": "Crossed Axis",
+    "description": "Coverage jumps across the 180-degree line without re-establishment.",
+    "fix": "Stay on one side, or insert a neutral/tracking bridge shot."
+  },
+  {
+    "pattern_id": "AP_012",
+    "name": "Eyeline Mismatch",
+    "description": "Reverse shots do not reverse look direction.",
+    "fix": "If A looks screen-right, B must look screen-left in reverse."
+  },
+  {
+    "pattern_id": "AP_013",
+    "name": "Effect Before Cause",
+    "description": "Reaction appears before the triggering action.",
+    "fix": "Cut to cause first, then effect/reaction."
+  },
+  {
+    "pattern_id": "AP_014",
+    "name": "Weak Silhouette",
+    "description": "Attitude and line of action disappear when filled black.",
+    "fix": "Push asymmetry, clearer LOA, and staged overlaps for readable silhouette."
+  },
+  {
+    "pattern_id": "AP_015",
+    "name": "Competing Focal Points",
+    "description": "Multiple equal-strength points fight for attention in one shot.",
+    "fix": "Reduce to one idea; restage or cut competing action into another shot."
+  }
+]

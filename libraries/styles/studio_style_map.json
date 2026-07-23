@@ -1,0 +1,28 @@
+{
+  "source": "story_standalone",
+  "default_style_by_studio": {
+    "studio_story": "symmetrical_pastel_cinema"
+  },
+  "recommended_style_ids": {
+    "studio_story": [
+      "symmetrical_pastel_cinema",
+      "neon_noir_chase",
+      "documentary_truth_light",
+      "epic_wide_myth",
+      "storybook_character_line",
+      "comic_panel_beats",
+      "ink_bw_editorial",
+      "surreal_dream_cut",
+      "moody_portrait_brand"
+    ]
+  },
+  "feature_boosts_by_studio": {
+    "studio_story": [
+      "cinematic",
+      "characters",
+      "scenes",
+      "epic",
+      "dreamy"
+    ]
+  }
+}

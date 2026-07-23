@@ -1,0 +1,22 @@
+{
+  "source": "midlibrary_taxonomy_inspired",
+  "note": "Category names mirror Midlibrary art-style taxonomy. No scraped assets.",
+  "selection_rule": "single_category_per_style",
+  "categories": [
+    {"id": "architects", "label": "Architects", "priority": "low"},
+    {"id": "techniques", "label": "Artistic Techniques", "priority": "high"},
+    {"id": "designers", "label": "Designers", "priority": "high"},
+    {"id": "fashion_designers", "label": "Fashion Designers", "priority": "medium"},
+    {"id": "filmmakers", "label": "Filmmakers", "priority": "critical"},
+    {"id": "general", "label": "General Modifiers", "priority": "medium"},
+    {"id": "genres", "label": "Genres + Art Movements", "priority": "medium"},
+    {"id": "illustrators", "label": "Illustrators", "priority": "high"},
+    {"id": "painters", "label": "Painters", "priority": "low"},
+    {"id": "photographers", "label": "Photographers", "priority": "medium"},
+    {"id": "printmakers", "label": "Printmakers", "priority": "low"},
+    {"id": "sculptors", "label": "Sculptors + Installation Artists", "priority": "low"},
+    {"id": "street_artists", "label": "Street Artists", "priority": "low"},
+    {"id": "titles", "label": "Titles", "priority": "low"},
+    {"id": "various", "label": "Various Artists", "priority": "low"}
+  ]
+}

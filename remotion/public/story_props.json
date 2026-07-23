@@ -1,0 +1,898 @@
+{
+  "title": "Story",
+  "fps": 24,
+  "visualVersion": 3,
+  "styleId": "symmetrical_pastel_cinema",
+  "grade": "pastel_muted",
+  "pace": "measured",
+  "cameraPreset": "locked_symmetric",
+  "palette": {
+    "bg0": "#e8dfe8",
+    "bg1": "#c5d4e8",
+    "bg2": "#9eb8d4",
+    "accent": "#7a9eb8",
+    "text": "#2a3344",
+    "muted": "#5a6a7a"
+  },
+  "continuity": {
+    "lineSide": "left",
+    "approved": true,
+    "violations": [],
+    "graph": {
+      "schema": "continuity_graph#v1",
+      "line_side": "left",
+      "nodes": [
+        {
+          "shot_id": 0,
+          "screen_direction": "hold",
+          "look_space": "left",
+          "composition": "C",
+          "eyeline": "consistent",
+          "state": {
+            "emotion": 0.55,
+            "pose": "idle",
+            "expression": "neutral",
+            "beat": "decision",
+            "prop": null
+          }
+        }
+      ],
+      "edges": [],
+      "violations": [],
+      "approved": true
+    }
+  },
+  "characterPath": null,
+  "characterRig": null,
+  "characterLayers": null,
+  "audioTimeline": {
+    "schema": "audio_timeline#v1",
+    "fps": 24,
+    "events": [
+      {
+        "cue": "ambience_soft",
+        "file": "audio/ambience_soft.wav",
+        "startFrame": 0,
+        "durationFrames": 60,
+        "shotId": 0,
+        "gainDb": -18.0,
+        "loop": true,
+        "role": "bed",
+        "reason": "bed_for_beat=decision"
+      },
+      {
+        "cue": "foley_footstep",
+        "file": "audio/foley_footstep_carpet_00.wav",
+        "startFrame": 12,
+        "durationFrames": null,
+        "shotId": 0,
+        "gainDb": -10.0,
+        "loop": false,
+        "role": "oneshot",
+        "reason": "screenplay_sfx@0.20"
+      }
+    ],
+    "totalFrames": 60,
+    "agent": "AudioCueAgent",
+    "notes": [
+      "shot0:foley_footstep@screenplay_sfx@0.20"
+    ]
+  },
+  "performanceChart": {
+    "agent": "PerformanceChartAgent",
+    "schema": "performance_chart#v1",
+    "fps": 24,
+    "shots": [
+      {
+        "shot_id": 0,
+        "pose": "idle",
+        "expression": "neutral",
+        "story_beat": "decision",
+        "duration_frames": 60,
+        "anticipation_frames": 6,
+        "hold_frames": 12,
+        "ant_end": 6,
+        "hold_start": 48,
+        "keyframes": [
+          {
+            "frame": 0,
+            "phase": "anticipation",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.01,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 4,
+            "phase": "eyes_lead",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.03,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 5,
+            "phase": "anticipation",
+            "joints": {
+              "pelvisY": -0.069,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.027500000000000004,
+              "rightArmSwing": -0.027500000000000004,
+              "headY": 0.0055000000000000005,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 6,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.0,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 12,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 18,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.05,
+              "pelvisY": 0.02,
+              "shouldersRotZ": -1.0,
+              "headY": 0.01,
+              "hipsRotZ": 1.0,
+              "leftArmSwing": 0.05,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 24,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 30,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.0,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 36,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 42,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.05,
+              "pelvisY": 0.02,
+              "shouldersRotZ": -1.0,
+              "headY": 0.01,
+              "hipsRotZ": 1.0,
+              "leftArmSwing": 0.05,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 47,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13166666666666668,
+              "rightKneeBend": 0.13166666666666668,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.029166666666666667,
+              "pelvisY": 0.011666666666666667,
+              "shouldersRotZ": -0.5833333333333333,
+              "headY": 0.005833333333333334,
+              "hipsRotZ": 0.5833333333333333,
+              "leftArmSwing": 0.029166666666666667,
+              "beltTiltDeg": 0.29166666666666663,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 48,
+            "phase": "hold",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.01,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 59,
+            "phase": "hold",
+            "joints": {
+              "pelvisY": 0.04,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.02,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          }
+        ],
+        "expression_channels": {
+          "emotion": "neutral",
+          "brows": 0.0,
+          "mouth": 0.0,
+          "eyesOpen": 1.0,
+          "faceSy": 0.0
+        },
+        "ms_per_frame": 41.6667,
+        "expression_curve": [
+          {
+            "frame": 0,
+            "eyesOpen": 1.0,
+            "brows": 0.0,
+            "mouth": 0.0
+          },
+          {
+            "frame": 4,
+            "eyesOpen": 1.0,
+            "brows": 0.0,
+            "mouth": 0.0
+          },
+          {
+            "frame": 6,
+            "eyesOpen": 1.0,
+            "brows": 0.0,
+            "mouth": 0.0
+          },
+          {
+            "frame": 59,
+            "eyesOpen": 1.0,
+            "brows": 0.0,
+            "mouth": 0.0
+          }
+        ],
+        "acting_lead_frames": 2
+      }
+    ],
+    "total_frames": 60,
+    "notes": [
+      "shots=1",
+      "keyframes=12",
+      "locomotion_enriched=1",
+      "acting_lead=1"
+    ]
+  },
+  "contactLock": {
+    "agent": "ContactLockAgent",
+    "schema": "contact_lock#v1",
+    "fps": 24,
+    "contacts": [],
+    "notes": [
+      "contacts=0",
+      "shots=1"
+    ]
+  },
+  "locomotionCycles": {
+    "agent": "LocomotionCycleAgent",
+    "schema": "locomotion_cycle#v1",
+    "fps": 24,
+    "cycles": [],
+    "notes": [
+      "gait_shots=0"
+    ]
+  },
+  "cameraCurves": {
+    "agent": "CameraCurveAgent",
+    "schema": "camera_curve#v1",
+    "fps": 24,
+    "shots": [
+      {
+        "shot_id": 0,
+        "move_id": "static",
+        "duration_frames": 60,
+        "keyframes": [
+          {
+            "frame": 0,
+            "scale": 1.0,
+            "tx": 0.0,
+            "ty": 0.0,
+            "ease": "hold"
+          },
+          {
+            "frame": 59,
+            "scale": 1.0,
+            "tx": 0.0,
+            "ty": 0.0,
+            "ease": "hold"
+          }
+        ],
+        "ms_per_frame": 41.6667
+      }
+    ],
+    "notes": [
+      "shots=1"
+    ]
+  },
+  "transitionEdges": {
+    "agent": "TransitionEdgeAgent",
+    "schema": "transition_edges#v1",
+    "fps": 24,
+    "edges": [],
+    "notes": [
+      "edges=0"
+    ]
+  },
+  "foleyTimeline": {
+    "agent": "FoleyTimelineAgent",
+    "schema": "foley_timeline#v1",
+    "fps": 24,
+    "events": [],
+    "notes": [
+      "events=0",
+      "contacts=0"
+    ]
+  },
+  "actingLead": {
+    "agent": "ActingLeadAgent",
+    "schema": "acting_lead#v1",
+    "fps": 24,
+    "shots": [
+      {
+        "shot_id": 0,
+        "pose": "idle",
+        "expression": "neutral",
+        "eyes_lead_frames": 2,
+        "eyes_frame": 4,
+        "head_frame": 6,
+        "duration_frames": 60,
+        "channels": {
+          "emotion": "neutral",
+          "brows": 0.0,
+          "mouth": 0.0,
+          "eyesOpen": 1.0,
+          "faceSy": 0.0
+        },
+        "ms_per_frame": 41.6667
+      }
+    ],
+    "notes": [
+      "shots=1"
+    ]
+  },
+  "phonemeSync": {
+    "agent": "PhonemeSyncAgent",
+    "schema": "phoneme_sync#v1",
+    "fps": 24,
+    "lead_frames": 2,
+    "active": false,
+    "align_method": null,
+    "phonemes": [],
+    "shots": [
+      {
+        "shot_id": 0,
+        "dialogue": "",
+        "phoneme_count": 0,
+        "duration_frames": 60,
+        "align_method": null
+      }
+    ],
+    "notes": [
+      "active=False",
+      "phonemes=0",
+      "lead=2",
+      "align=grapheme"
+    ]
+  },
+  "frameGate": {
+    "agent": "FrameGate",
+    "schema": "frame_gate#v1",
+    "passed": true,
+    "score": 1.0,
+    "findings": [],
+    "shots_checked": 1
+  },
+  "shots": [
+    {
+      "shotId": 0,
+      "title": "A",
+      "action": "Walk in",
+      "durationSec": 2.5,
+      "durationFrames": 60,
+      "holdFrames": 12,
+      "anticipationFrames": 6,
+      "dialogue": "",
+      "voPath": "",
+      "lens": "standard",
+      "camera": "static",
+      "cameraMove": {
+        "translate_x": 0,
+        "scale_end": 1.0,
+        "id": "static"
+      },
+      "shotSize": "MS",
+      "shotSizeScale": 1.0,
+      "composition": "C",
+      "lighting": "three_point",
+      "thirdsX": 0.5,
+      "lookSpace": "center",
+      "verb": null,
+      "storyBeat": null,
+      "sfx": [],
+      "craftHints": {
+        "id": null,
+        "do": [],
+        "dont": [],
+        "rig": {
+          "pose": "idle",
+          "expression": "neutral"
+        },
+        "actionBias": "even"
+      },
+      "envProfile": {
+        "mood": "neutral",
+        "haze": 0.18,
+        "lightShaft": false,
+        "groundStrength": 0.55,
+        "vignette": 0.32,
+        "horizonY": 0.62,
+        "lighting": "three_point",
+        "parallax": 0.55,
+        "depthLayers": 3
+      },
+      "shotRig": {
+        "fps": 24,
+        "totalFrames": 60,
+        "keyframes": [
+          {
+            "frame": 0,
+            "phase": "anticipation",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.01,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 4,
+            "phase": "eyes_lead",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.03,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 5,
+            "phase": "anticipation",
+            "joints": {
+              "pelvisY": -0.069,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.027500000000000004,
+              "rightArmSwing": -0.027500000000000004,
+              "headY": 0.0055000000000000005,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 6,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.0,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 12,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 18,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.05,
+              "pelvisY": 0.02,
+              "shouldersRotZ": -1.0,
+              "headY": 0.01,
+              "hipsRotZ": 1.0,
+              "leftArmSwing": 0.05,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 24,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 30,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.12,
+              "rightKneeBend": 0.12,
+              "leftLegStride": 0.0,
+              "rightArmSwing": 0.0,
+              "pelvisY": 0.0,
+              "shouldersRotZ": 0.0,
+              "headY": 0.0,
+              "hipsRotZ": 0.0,
+              "leftArmSwing": 0.0,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 36,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13,
+              "rightKneeBend": 0.13,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.025,
+              "pelvisY": 0.01,
+              "shouldersRotZ": -0.5,
+              "headY": 0.005,
+              "hipsRotZ": 0.5,
+              "leftArmSwing": 0.025,
+              "beltTiltDeg": 0.25,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 42,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.05,
+              "pelvisY": 0.02,
+              "shouldersRotZ": -1.0,
+              "headY": 0.01,
+              "hipsRotZ": 1.0,
+              "leftArmSwing": 0.05,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 47,
+            "phase": "idle",
+            "joints": {
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.13166666666666668,
+              "rightKneeBend": 0.13166666666666668,
+              "leftLegStride": 0.0,
+              "rightArmSwing": -0.029166666666666667,
+              "pelvisY": 0.011666666666666667,
+              "shouldersRotZ": -0.5833333333333333,
+              "headY": 0.005833333333333334,
+              "hipsRotZ": 0.5833333333333333,
+              "leftArmSwing": 0.029166666666666667,
+              "beltTiltDeg": 0.29166666666666663,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 48,
+            "phase": "hold",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.01,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 59,
+            "phase": "hold",
+            "joints": {
+              "pelvisY": 0.04,
+              "hipsRotZ": 1.0,
+              "shouldersRotZ": -1.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.14,
+              "rightKneeBend": 0.14,
+              "leftArmSwing": 0.05,
+              "rightArmSwing": -0.05,
+              "headY": 0.02,
+              "beltTiltDeg": 0.5,
+              "shoulderTiltDeg": 0.0
+            }
+          }
+        ],
+        "expression": {
+          "emotion": "neutral",
+          "brows": 0.0,
+          "mouth": 0.0,
+          "eyesOpen": 1.0,
+          "faceSy": 0.0
+        },
+        "pose": "idle",
+        "performance_id": "chart:idle",
+        "williams_character": false,
+        "source": "PerformanceChartAgent"
+      },
+      "look": {
+        "gradeId": "pastel_muted",
+        "palette": {
+          "bg0": "#e8dfe8",
+          "bg1": "#c5d4e8",
+          "bg2": "#9eb8d4",
+          "accent": "#7a9eb8",
+          "text": "#2a3344",
+          "muted": "#5a6a7a"
+        },
+        "vignette": 0.32,
+        "grain": 0.12,
+        "lutStrength": 0.18,
+        "contrast": 1.06,
+        "parallax": 0.55,
+        "depthLayers": 3
+      },
+      "blinkEveryFrames": 48,
+      "captionMode": "lower_third",
+      "transitionIn": {
+        "id": "crossfade",
+        "frames": 12,
+        "opacity": true,
+        "slide": true
+      },
+      "performancePhases": {
+        "ant_end": 6,
+        "hold_start": 48
+      },
+      "cameraCurve": {
+        "move_id": "static",
+        "keyframes": [
+          {
+            "frame": 0,
+            "scale": 1.0,
+            "tx": 0.0,
+            "ty": 0.0,
+            "ease": "hold"
+          },
+          {
+            "frame": 59,
+            "scale": 1.0,
+            "tx": 0.0,
+            "ty": 0.0,
+            "ease": "hold"
+          }
+        ]
+      },
+      "expressionCurve": [
+        {
+          "frame": 0,
+          "eyesOpen": 1.0,
+          "brows": 0.0,
+          "mouth": 0.0
+        },
+        {
+          "frame": 4,
+          "eyesOpen": 1.0,
+          "brows": 0.0,
+          "mouth": 0.0
+        },
+        {
+          "frame": 6,
+          "eyesOpen": 1.0,
+          "brows": 0.0,
+          "mouth": 0.0
+        },
+        {
+          "frame": 59,
+          "eyesOpen": 1.0,
+          "brows": 0.0,
+          "mouth": 0.0
+        }
+      ]
+    }
+  ],
+  "complianceFrame": {
+    "agent": "ComplianceFrameAgent",
+    "schema": "compliance_frame#v1",
+    "passed": true,
+    "score": 1.0,
+    "flags": {
+      "fps_ok": true,
+      "line_180_ok": true,
+      "eyeline_ok": true,
+      "chart_present": true,
+      "contact_present": true
+    },
+    "findings": [],
+    "notes": [
+      "flags_ok=5/5"
+    ]
+  }
+}

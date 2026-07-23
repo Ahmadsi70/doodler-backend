@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv/
+env.bak/
+venv.bak/
+
+# Models and data
+models/
+runpod_backend/models/
+runpod_backend/AnimatedDrawings/
+sfx_*.wav
+test_input.json
+
+# IDEs
+.vscode/
+.idea/
+
+# RunPod/Docker
+.runpod/
+node_modules/
+remotion/node_modules/
+out/  

@@ -1,0 +1,67 @@
+{
+  "anti_patterns": [
+    {
+      "id": "major_beginner_mistake_too_fast",
+      "symptom": "Doing too much action in too short a space of time.",
+      "why_bad": "The action flashes by too fast for the audience to register it, losing readability and weight.",
+      "fix": "Go twice as slow. Add in cushioning drawings at the beginning and end to slow the action down.",
+      "detect_heuristic": "duration_frames < 24 AND action_complexity == high",
+      "severity": "high",
+      "confidence": 0.95
+    },
+    {
+      "id": "leaving_thirds_to_assistant",
+      "symptom": "Providing a timing chart that leaves the assistant to calculate three evenly spaced inbetweens.",
+      "why_bad": "It compounds spacing errors and turns fluid arcs into wobbly, all-over-the-place movements.",
+      "fix": "The animator should draw one of the inbetweens themselves, leaving the assistant to divide the remaining gap exactly in half.",
+      "detect_heuristic": "chart_divisions == 3 AND animator_drawings == 0",
+      "severity": "high",
+      "confidence": 0.95
+    },
+    {
+      "id": "midpoint_impact_squash",
+      "symptom": "Placing an inbetween exactly in the mathematical middle of a contact action, such as a ball falling or a mallet hitting a nail.",
+      "why_bad": "The object begins to squash, distend, or bend while still floating in the air, before the actual impact.",
+      "fix": "The change in shape must only take place exactly on the contact frame.",
+      "detect_heuristic": "squash_amount > 0 AND distance_to_contact_surface > 0",
+      "severity": "high",
+      "confidence": 0.95
+    },
+    {
+      "id": "straight_line_inbetweening",
+      "symptom": "Inbetweening organic limb movements in a perfectly straight line between two extremes.",
+      "why_bad": "The bones appear to shrink in length at the midpoint, destroying the natural, continuous flow of the action.",
+      "fix": "Ensure the path of action follows a continuous arc or figure-8, dragging the wrist or joint along the curve [4, 5].",
+      "detect_heuristic": "midpoint_position == lerp(extreme_A, extreme_B) AND joint_type != mechanical",
+      "severity": "high",
+      "confidence": 0.95
+    },
+    {
+      "id": "level_pelvis_walk",
+      "symptom": "Tracing or animating a walk where the head and body move horizontally in a smooth, level line.",
+      "why_bad": "The character appears to float weightlessly; weight cannot be conveyed by smooth level movement.",
+      "fix": "Accentuate and exaggerate the up and down positions of the masses. Make the body mass drop on the bent leg to feel the weight.",
+      "detect_heuristic": "pelvis_y_max == pelvis_y_min OR pelvis_variance < threshold",
+      "severity": "high",
+      "confidence": 0.95
+    },
+    {
+      "id": "arm_swing_widest_on_contact",
+      "symptom": "Animating the arm swing to reach its widest spread exactly on the foot's contact position.",
+      "why_bad": "It looks stiff and mechanical, ignoring the natural pendulum momentum of the body balancing the thrust of the leg.",
+      "fix": "Delay the arm swing so it is at its widest on the 'down' position, which occurs after the contact position.",
+      "detect_heuristic": "arm_swing_max_width_frame == foot_contact_frame",
+      "severity": "medium",
+      "confidence": 0.9
+    },
+    {
+      "id": "figure_eight_pigeon_walk",
+      "symptom": "Applying perfect repetitive cycles of circles or figure-8s to the body and head action during a standard walk.",
+      "why_bad": "It results in an unnatural, mechanical loop that resembles a pigeon or bird walking.",
+      "fix": "Keep the main body mass mostly straight up and down for safety, avoiding perfect looped patterns on the head.",
+      "detect_heuristic": "head_path == perfect_figure_8 OR body_path == perfect_circle",
+      "severity": "medium",
+      "confidence": 0.85
+    }
+  ]
+}

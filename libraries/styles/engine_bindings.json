@@ -1,0 +1,67 @@
+{
+  "source": "story_standalone",
+  "note": "Story-only style → camera/grade/pace/endcard bindings.",
+  "camera_presets": {
+    "locked_symmetric": {
+      "move": "static",
+      "framing": "centered",
+      "dutch": false
+    },
+    "motivated_track": {
+      "move": "motivated_truck",
+      "framing": "rule_of_thirds",
+      "dutch": false
+    },
+    "documentary_hand": {
+      "move": "subtle_handheld",
+      "framing": "observational",
+      "dutch": false
+    },
+    "kinetic_push": {
+      "move": "quick_push_in",
+      "framing": "tight_hero",
+      "dutch": false
+    }
+  },
+  "grade_presets": {
+    "pastel_muted": {
+      "saturation": 0.75,
+      "contrast": 0.9,
+      "temperature": "warm_soft"
+    },
+    "moody_teal_orange": {
+      "saturation": 0.95,
+      "contrast": 1.15,
+      "temperature": "cool_shadows_warm_highlights"
+    },
+    "vivid_pop": {
+      "saturation": 1.25,
+      "contrast": 1.1,
+      "temperature": "neutral_punch"
+    },
+    "bw_graphic": {
+      "saturation": 0.0,
+      "contrast": 1.3,
+      "temperature": "neutral"
+    },
+    "clean_corporate": {
+      "saturation": 0.85,
+      "contrast": 1.0,
+      "temperature": "cool_clean"
+    }
+  },
+  "pace_presets": {
+    "measured": {"avg_shot_sec": 2.5, "max_cuts_per_10s": 3},
+    "chase_punch": {"avg_shot_sec": 1.4, "max_cuts_per_10s": 6},
+    "panel_punch": {"avg_shot_sec": 1.6, "max_cuts_per_10s": 5},
+    "explainer_steady": {"avg_shot_sec": 3.0, "max_cuts_per_10s": 3}
+  },
+  "motion_style_aliases": {
+    "kinetic_type": "story_kinetic"
+  },
+  "endcard_presets": {
+    "soft_brand_tag": {"start_ratio": 0.8, "fade_in_sec": 0.6},
+    "soft_fade": {"start_ratio": 0.88, "fade_in_sec": 0.5},
+    "logo_last_5s": {"start_ratio": 0.85, "fade_in_sec": 0.4}
+  }
+}

@@ -1,0 +1,546 @@
+{
+  "title": "GoldenContract",
+  "fps": 24,
+  "visualVersion": 3,
+  "styleId": "symmetrical_pastel_cinema",
+  "grade": "pastel_muted",
+  "pace": "measured",
+  "cameraPreset": "locked_symmetric",
+  "palette": {
+    "bg0": "#e8dfe8",
+    "bg1": "#c5d4e8",
+    "bg2": "#9eb8d4",
+    "accent": "#7a9eb8",
+    "text": "#2a3344",
+    "muted": "#5a6a7a"
+  },
+  "continuity": {
+    "lineSide": "right",
+    "approved": true,
+    "violations": [],
+    "graph": {
+      "schema": "continuity_graph#v1",
+      "line_side": "right",
+      "nodes": [
+        {
+          "shot_id": 0,
+          "screen_direction": "L_to_R",
+          "look_space": "right",
+          "composition": "L",
+          "eyeline": "consistent",
+          "state": {
+            "emotion": 0.35,
+            "pose": "walk",
+            "expression": "neutral",
+            "beat": "entrance",
+            "prop": null
+          }
+        },
+        {
+          "shot_id": 1,
+          "screen_direction": "hold",
+          "look_space": "none",
+          "composition": "C",
+          "eyeline": "consistent",
+          "state": {
+            "emotion": 0.75,
+            "pose": "react",
+            "expression": "shock",
+            "beat": "reaction",
+            "prop": null
+          }
+        },
+        {
+          "shot_id": 2,
+          "screen_direction": "R_to_L",
+          "look_space": "left",
+          "composition": "R",
+          "eyeline": "consistent",
+          "state": {
+            "emotion": 0.4,
+            "pose": "walk",
+            "expression": "neutral",
+            "beat": "exit",
+            "prop": null
+          }
+        }
+      ],
+      "edges": [
+        {
+          "from": 0,
+          "to": 1,
+          "transition": "hard_cut",
+          "must_match": [
+            "eyeline"
+          ],
+          "risk": null
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "transition": "hard_cut",
+          "must_match": [
+            "eyeline"
+          ],
+          "risk": null
+        }
+      ],
+      "violations": [],
+      "approved": true
+    }
+  },
+  "characterPath": null,
+  "characterRig": null,
+  "shots": [
+    {
+      "shotId": 0,
+      "title": "Shot 0",
+      "action": "Hero enters.",
+      "durationSec": 3.0,
+      "durationFrames": 72,
+      "holdFrames": 12,
+      "anticipationFrames": 6,
+      "lens": "standard",
+      "camera": "static",
+      "cameraMove": {
+        "translate_x": 0,
+        "scale_end": 1.0,
+        "id": "static"
+      },
+      "composition": "L",
+      "lighting": "three_point",
+      "thirdsX": 0.33,
+      "lookSpace": "right",
+      "verb": "hero",
+      "storyBeat": "entrance",
+      "craftHints": {
+        "id": "business_walk_entrance",
+        "do": [
+          "Set leg stride to a 12-frame rhythm per step.",
+          "Dip pelvisY and headY to their lowest points on the contact 'down' pose to establish physical weight.",
+          "Oppose shouldersRotZ heavily against hipsRotZ to create structural balance and vitality.",
+          "Swing arm in a wide pendulum arc, peaking in width on the down position."
+        ],
+        "dont": [
+          "Keep pelvisY flat and level, which causes a weightless floating effect.",
+          "Move arms and legs on the same side of the rig forward simultaneously."
+        ],
+        "rig": {
+          "pose": "walk",
+          "expression": "neutral"
+        },
+        "actionBias": "even"
+      },
+      "envProfile": {
+        "mood": "soft",
+        "haze": 0.22,
+        "lightShaft": true,
+        "groundStrength": 0.55,
+        "vignette": 0.25,
+        "horizonY": 0.62,
+        "lighting": "three_point"
+      },
+      "shotRig": {
+        "fps": 24,
+        "totalFrames": 24,
+        "keyframes": [
+          {
+            "frame": 0,
+            "phase": "contact",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 6.0,
+              "shouldersRotZ": -8.0,
+              "leftLegStride": 0.55,
+              "rightLegStride": -0.45,
+              "leftKneeBend": 0.22,
+              "rightKneeBend": 0.35,
+              "leftArmSwing": -0.5,
+              "rightArmSwing": 0.55,
+              "headY": 0.02,
+              "beltTiltDeg": 3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 6,
+            "phase": "down",
+            "joints": {
+              "pelvisY": -0.04,
+              "hipsRotZ": 4.0,
+              "shouldersRotZ": -6.0,
+              "leftLegStride": 0.35,
+              "rightLegStride": -0.25,
+              "leftKneeBend": 0.4,
+              "rightKneeBend": 0.28,
+              "leftArmSwing": -0.3,
+              "rightArmSwing": 0.35,
+              "headY": -0.02,
+              "beltTiltDeg": 2.0,
+              "shoulderTiltDeg": 1.0
+            }
+          },
+          {
+            "frame": 12,
+            "phase": "passing",
+            "joints": {
+              "pelvisY": 0.08,
+              "hipsRotZ": -6.0,
+              "shouldersRotZ": 8.0,
+              "leftLegStride": -0.45,
+              "rightLegStride": 0.55,
+              "leftKneeBend": 0.35,
+              "rightKneeBend": 0.22,
+              "leftArmSwing": 0.55,
+              "rightArmSwing": -0.5,
+              "headY": 0.04,
+              "beltTiltDeg": -3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 18,
+            "phase": "up",
+            "joints": {
+              "pelvisY": 0.06,
+              "hipsRotZ": -4.0,
+              "shouldersRotZ": 6.0,
+              "leftLegStride": -0.25,
+              "rightLegStride": 0.35,
+              "leftKneeBend": 0.28,
+              "rightKneeBend": 0.4,
+              "leftArmSwing": 0.35,
+              "rightArmSwing": -0.3,
+              "headY": 0.03,
+              "beltTiltDeg": -2.0,
+              "shoulderTiltDeg": -1.0
+            }
+          },
+          {
+            "frame": 24,
+            "phase": "contact",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 6.0,
+              "shouldersRotZ": -8.0,
+              "leftLegStride": 0.55,
+              "rightLegStride": -0.45,
+              "leftKneeBend": 0.22,
+              "rightKneeBend": 0.35,
+              "leftArmSwing": -0.5,
+              "rightArmSwing": 0.55,
+              "headY": 0.02,
+              "beltTiltDeg": 3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          }
+        ],
+        "expression": {
+          "emotion": "neutral",
+          "brows": 0.0,
+          "mouth": 0.0,
+          "eyesOpen": 1.0,
+          "faceSy": 0.0
+        },
+        "pose": "walk",
+        "performance_id": "walk",
+        "williams_character": false
+      },
+      "captionMode": "lower_third",
+      "transitionIn": {
+        "id": "crossfade",
+        "frames": 12,
+        "opacity": true,
+        "slide": true
+      }
+    },
+    {
+      "shotId": 1,
+      "title": "Shot 1",
+      "action": "Then shock because fire.",
+      "durationSec": 4.0,
+      "durationFrames": 96,
+      "holdFrames": 12,
+      "anticipationFrames": 6,
+      "lens": "standard",
+      "camera": "motivated_push",
+      "cameraMove": {
+        "translate_x": 0,
+        "scale_end": 1.14,
+        "id": "motivated_push"
+      },
+      "composition": "C",
+      "lighting": "three_point",
+      "thirdsX": 0.5,
+      "lookSpace": "center",
+      "verb": "then",
+      "storyBeat": "reaction",
+      "craftHints": {
+        "id": "shock_take_reaction",
+        "do": [
+          "Use scale squash to sharply compress the character downward for 4 frames of anticipation.",
+          "Trigger a spring enter to snap the body upward into maximum extension.",
+          "Use a slow_in action bias to beautifully cushion into the final extreme holding pose.",
+          "Couple the spring enter with a camera push to amplify the emotional hit."
+        ],
+        "dont": [
+          "Animate linearly from the idle state directly into the shock expression.",
+          "Settle into a completely dead mathematical freeze after the spring resolves."
+        ],
+        "rig": {
+          "pose": "react",
+          "expression": "shock"
+        },
+        "actionBias": "slow_in"
+      },
+      "envProfile": {
+        "mood": "tense",
+        "haze": 0.35,
+        "lightShaft": false,
+        "groundStrength": 0.55,
+        "vignette": 0.42,
+        "horizonY": 0.62,
+        "lighting": "three_point"
+      },
+      "shotRig": {
+        "fps": 24,
+        "totalFrames": 16,
+        "keyframes": [
+          {
+            "frame": 0,
+            "phase": "anticipation",
+            "joints": {
+              "pelvisY": -0.06,
+              "hipsRotZ": 0.0,
+              "shouldersRotZ": 6.0,
+              "leftLegStride": 0.0,
+              "rightLegStride": 0.0,
+              "leftKneeBend": 0.15,
+              "rightKneeBend": 0.15,
+              "leftArmSwing": 0.1,
+              "rightArmSwing": -0.1,
+              "headY": 0.12,
+              "beltTiltDeg": 0.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 6,
+            "phase": "hit",
+            "joints": {
+              "pelvisY": -0.24,
+              "hipsRotZ": -4.0,
+              "shouldersRotZ": 18.0,
+              "leftLegStride": -0.15,
+              "rightLegStride": 0.2,
+              "leftKneeBend": 0.45,
+              "rightKneeBend": 0.4,
+              "leftArmSwing": 0.35,
+              "rightArmSwing": -0.4,
+              "headY": 0.33999999999999997,
+              "beltTiltDeg": -4.0,
+              "shoulderTiltDeg": 8.0
+            }
+          },
+          {
+            "frame": 16,
+            "phase": "settle",
+            "joints": {
+              "pelvisY": -0.16,
+              "hipsRotZ": -2.0,
+              "shouldersRotZ": 14.0,
+              "leftLegStride": -0.1,
+              "rightLegStride": 0.12,
+              "leftKneeBend": 0.35,
+              "rightKneeBend": 0.32,
+              "leftArmSwing": 0.25,
+              "rightArmSwing": -0.28,
+              "headY": 0.26,
+              "beltTiltDeg": -2.0,
+              "shoulderTiltDeg": 5.0
+            }
+          }
+        ],
+        "expression": {
+          "emotion": "shock",
+          "brows": 0.85,
+          "mouth": 0.7,
+          "eyesOpen": 0.35,
+          "faceSy": 0.1
+        },
+        "pose": "react",
+        "performance_id": "react",
+        "williams_character": false
+      },
+      "captionMode": "lower_third",
+      "transitionIn": {
+        "id": "hard_cut",
+        "frames": 2,
+        "opacity": true,
+        "slide": false
+      }
+    },
+    {
+      "shotId": 2,
+      "title": "Shot 2",
+      "action": "Exit into dark.",
+      "durationSec": 3.0,
+      "durationFrames": 72,
+      "holdFrames": 12,
+      "anticipationFrames": 6,
+      "lens": "standard",
+      "camera": "static",
+      "cameraMove": {
+        "translate_x": 0,
+        "scale_end": 1.0,
+        "id": "static"
+      },
+      "composition": "R",
+      "lighting": "three_point",
+      "thirdsX": 0.67,
+      "lookSpace": "left",
+      "verb": "exit",
+      "storyBeat": "exit",
+      "craftHints": {
+        "id": "scramble_run_exit",
+        "do": [
+          "Compress leg stride timing strictly to 6 frames per step.",
+          "Apply elongated scale squash heavily on the fast lateral drift to simulate transparent motion blur.",
+          "Vigorously pump arm swing forward and backward to oppose the legs.",
+          "Drive pelvisY down aggressively on the contact frames for maximum impact."
+        ],
+        "dont": [
+          "Use slow_in or slow_out cushioning between the run steps.",
+          "Let the arms dangle loosely or drift without intentional opposition to the legs."
+        ],
+        "rig": {
+          "pose": "walk",
+          "expression": "neutral"
+        },
+        "actionBias": "even"
+      },
+      "envProfile": {
+        "mood": "exit",
+        "haze": 0.22,
+        "lightShaft": false,
+        "groundStrength": 0.35,
+        "vignette": 0.3,
+        "horizonY": 0.7,
+        "lighting": "three_point"
+      },
+      "shotRig": {
+        "fps": 24,
+        "totalFrames": 24,
+        "keyframes": [
+          {
+            "frame": 0,
+            "phase": "contact",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 6.0,
+              "shouldersRotZ": -8.0,
+              "leftLegStride": 0.55,
+              "rightLegStride": -0.45,
+              "leftKneeBend": 0.22,
+              "rightKneeBend": 0.35,
+              "leftArmSwing": -0.5,
+              "rightArmSwing": 0.55,
+              "headY": 0.02,
+              "beltTiltDeg": 3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 6,
+            "phase": "down",
+            "joints": {
+              "pelvisY": -0.04,
+              "hipsRotZ": 4.0,
+              "shouldersRotZ": -6.0,
+              "leftLegStride": 0.35,
+              "rightLegStride": -0.25,
+              "leftKneeBend": 0.4,
+              "rightKneeBend": 0.28,
+              "leftArmSwing": -0.3,
+              "rightArmSwing": 0.35,
+              "headY": -0.02,
+              "beltTiltDeg": 2.0,
+              "shoulderTiltDeg": 1.0
+            }
+          },
+          {
+            "frame": 12,
+            "phase": "passing",
+            "joints": {
+              "pelvisY": 0.08,
+              "hipsRotZ": -6.0,
+              "shouldersRotZ": 8.0,
+              "leftLegStride": -0.45,
+              "rightLegStride": 0.55,
+              "leftKneeBend": 0.35,
+              "rightKneeBend": 0.22,
+              "leftArmSwing": 0.55,
+              "rightArmSwing": -0.5,
+              "headY": 0.04,
+              "beltTiltDeg": -3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          },
+          {
+            "frame": 18,
+            "phase": "up",
+            "joints": {
+              "pelvisY": 0.06,
+              "hipsRotZ": -4.0,
+              "shouldersRotZ": 6.0,
+              "leftLegStride": -0.25,
+              "rightLegStride": 0.35,
+              "leftKneeBend": 0.28,
+              "rightKneeBend": 0.4,
+              "leftArmSwing": 0.35,
+              "rightArmSwing": -0.3,
+              "headY": 0.03,
+              "beltTiltDeg": -2.0,
+              "shoulderTiltDeg": -1.0
+            }
+          },
+          {
+            "frame": 24,
+            "phase": "contact",
+            "joints": {
+              "pelvisY": 0.02,
+              "hipsRotZ": 6.0,
+              "shouldersRotZ": -8.0,
+              "leftLegStride": 0.55,
+              "rightLegStride": -0.45,
+              "leftKneeBend": 0.22,
+              "rightKneeBend": 0.35,
+              "leftArmSwing": -0.5,
+              "rightArmSwing": 0.55,
+              "headY": 0.02,
+              "beltTiltDeg": 3.0,
+              "shoulderTiltDeg": 0.0
+            }
+          }
+        ],
+        "expression": {
+          "emotion": "neutral",
+          "brows": 0.0,
+          "mouth": 0.0,
+          "eyesOpen": 1.0,
+          "faceSy": 0.0
+        },
+        "pose": "walk",
+        "performance_id": "walk",
+        "williams_character": false
+      },
+      "captionMode": "lower_third",
+      "transitionIn": {
+        "id": "hard_cut",
+        "frames": 2,
+        "opacity": true,
+        "slide": false
+      }
+    }
+  ]
+}

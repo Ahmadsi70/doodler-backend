@@ -1,0 +1,214 @@
+{
+  "principles": [
+    {
+      "id": "set_the_tempo_timing",
+      "principle": "timing",
+      "definition_ops": "Time actions in seconds using a stopwatch or metronome before drawing to establish the rhythm. Use 12 frames per step for a normal walk, 6 frames for a run, and 4 frames for a fast run.",
+      "frame_hints_24fps": {
+        "min": 4,
+        "typical": 12,
+        "max": 24
+      },
+      "applies_to": [
+        "walk",
+        "run",
+        "acting"
+      ],
+      "priority": 5,
+      "confidence": 0.95,
+      "source_chapter": "SET THE TEMPO"
+    },
+    {
+      "id": "cushioning_extremes",
+      "principle": "slow_in_out",
+      "definition_ops": "Create easing by spacing inbetween drawings progressively closer together as they approach or leave an extreme pose. Use this cushioning to indicate mass slowing down or starting up.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting",
+        "walk"
+      ],
+      "priority": 4,
+      "confidence": 0.55,
+      "source_chapter": "EXTREMES and BREAKDOWNS"
+    },
+    {
+      "id": "path_of_action_arcs",
+      "principle": "arcs",
+      "definition_ops": "Plot the path of action for all joints and extremities to ensure they follow smooth, continuous arcs or figure-8 patterns. Avoid linear movement unless depicting a forceful, mechanical strike.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "walk",
+        "run",
+        "acting"
+      ],
+      "priority": 4,
+      "confidence": 0.55,
+      "source_chapter": "WATCH YOUR ARCS"
+    },
+    {
+      "id": "combination_method",
+      "principle": "straight_ahead_pose_to_pose",
+      "definition_ops": "Draft the storytelling keys and extremes first to map the scene's structure. Animate straight ahead over these guideposts, handling one specific body part at a time to retain spontaneous flow.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting",
+        "walk",
+        "run"
+      ],
+      "priority": 5,
+      "confidence": 0.8,
+      "source_chapter": "3 WAYS TO ANIMATE"
+    },
+    {
+      "id": "elongated_inbetween",
+      "principle": "squash_stretch",
+      "definition_ops": "Elongate the character's shape to bridge gaps during fast movements, simulating a transparent motion blur. Compress the volume immediately upon contact to amplify the impact.",
+      "frame_hints_24fps": {
+        "min": 1,
+        "typical": 1,
+        "max": 2
+      },
+      "applies_to": [
+        "run",
+        "acting"
+      ],
+      "priority": 3,
+      "confidence": 0.85,
+      "source_chapter": "The ELONGATED INBETWEEN"
+    },
+    {
+      "id": "joint_breaking_drag",
+      "principle": "follow_through_overlapping",
+      "definition_ops": "Drag extremities like hands and feet behind the leading joints to create overlapping action. Break the joints in motion to make straight limbs appear limber and flexible.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "walk",
+        "run",
+        "acting"
+      ],
+      "priority": 4,
+      "confidence": 0.55,
+      "source_chapter": "LOOSENING IT UP"
+    },
+    {
+      "id": "inside_out_mass",
+      "principle": "solid_drawing",
+      "definition_ops": "Construct figures from the inside out using 3D masses rather than drawing flat, graphic outlines. Ensure structural balance by naturally opposing the angles of the pelvis and shoulders.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting",
+        "walk",
+        "run"
+      ],
+      "priority": 5,
+      "confidence": 0.55,
+      "source_chapter": "TIME TO DRAW"
+    },
+    {
+      "id": "exaggerate_weight",
+      "principle": "exaggeration",
+      "definition_ops": "Amplify the highest and lowest points of a character's mass during movement to impart a believable sense of weight. Exaggerate pose contrast far beyond what a rotoscoped live-action frame provides.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "walk",
+        "run",
+        "acting"
+      ],
+      "priority": 4,
+      "confidence": 0.55,
+      "source_chapter": "GETTING THE WEIGHT"
+    },
+    {
+      "id": "anticipatory_extreme",
+      "principle": "anticipation",
+      "definition_ops": "Add a preparatory movement in the opposite direction before a primary action to signal intent to the viewer. Place this anticipation as a distinct extreme pose on your exposure sheet.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting",
+        "walk",
+        "run"
+      ],
+      "priority": 3,
+      "confidence": 0.55,
+      "source_chapter": "3 WAYS TO ANIMATE"
+    },
+    {
+      "id": "counteraction_offset",
+      "principle": "secondary_action",
+      "definition_ops": "Animate clothing, hair, and soft tissue so they move in the opposite vertical direction of the main body mass. Delay these elements slightly so they offset the primary timing and add richness.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "walk",
+        "run"
+      ],
+      "priority": 3,
+      "confidence": 0.55,
+      "source_chapter": "COUNTERACTION"
+    },
+    {
+      "id": "storytelling_readability",
+      "principle": "staging",
+      "definition_ops": "Design storytelling key poses that communicate the specific action, attitude, and emotion instantly. Ensure the silhouette is unmistakable and clearly readable before calculating any inbetweens.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting",
+        "camera"
+      ],
+      "priority": 5,
+      "confidence": 0.55,
+      "source_chapter": "KEYS"
+    },
+    {
+      "id": "believable_performance",
+      "principle": "appeal",
+      "definition_ops": "Base the character's movement on distinct, recognizable personalities and emotions rather than generic mechanical formulas. Ground imaginative, wacky designs in believable physical weight and empathetic acting.",
+      "frame_hints_24fps": {
+        "min": 0,
+        "typical": 0,
+        "max": 0
+      },
+      "applies_to": [
+        "acting"
+      ],
+      "priority": 4,
+      "confidence": 0.55,
+      "source_chapter": "WHY THIS BOOK?"
+    }
+  ]
+}

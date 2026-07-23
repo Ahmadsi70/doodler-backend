@@ -1,0 +1,37 @@
+{
+  "id": "context-act-0",
+  "token_budget": 8000,
+  "token_used": 83,
+  "layers": [
+    {
+      "name": "essential",
+      "budget_pct": 0.4,
+      "token_budget": 3200,
+      "token_used": 25,
+      "content": "BIBLE: GoldenContract\nACT: Act 1 (act-0)\nGOAL: Hero enters. \u2026 Exit into dark.\nSHOTS: 0..2 DUR=10.0s"
+    },
+    {
+      "name": "relevant",
+      "budget_pct": 0.35,
+      "token_budget": 2800,
+      "token_used": 34,
+      "content": "[0] entrance/walk/static: Hero enters.\n[1] reaction/react/motivated_push: Then shock because fire.\n[2] exit/walk/static: Exit into dark."
+    },
+    {
+      "name": "summary",
+      "budget_pct": 0.15,
+      "token_budget": 1200,
+      "token_used": 4,
+      "content": "PRIOR: (none)"
+    },
+    {
+      "name": "collaboration",
+      "budget_pct": 0.1,
+      "token_budget": 800,
+      "token_used": 20,
+      "content": "mode=direct quality=light emotion=neutral style=symmetrical_pastel_cinema notes="
+    }
+  ],
+  "query": "Hero enters. \u2026 Exit into dark.",
+  "notes": "act_scoped_v1"
+}

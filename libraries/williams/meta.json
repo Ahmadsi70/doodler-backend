@@ -1,0 +1,13 @@
+{
+  "id": "williams_craft_pack",
+  "version": "1.0.0",
+  "fps": 24,
+  "source_book": "The Animator's Survival Kit (Richard Williams)",
+  "provenance": "NotebookLM operational distill — not verbatim book text",
+  "files": [
+    "principles.json",
+    "timing_recipes.json",
+    "shot_behaviors.json",
+    "anti_patterns.json"
+  ]
+}

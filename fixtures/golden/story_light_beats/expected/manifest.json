@@ -1,0 +1,23 @@
+{
+  "slide_count": 4,
+  "resolution": [
+    1280,
+    720
+  ],
+  "accent_rgb_first": [
+    158,
+    201,
+    255
+  ],
+  "accent_rgb_last": [
+    158,
+    201,
+    255
+  ],
+  "names": [
+    "slide_000.png",
+    "slide_001.png",
+    "slide_002.png",
+    "slide_003.png"
+  ]
+}

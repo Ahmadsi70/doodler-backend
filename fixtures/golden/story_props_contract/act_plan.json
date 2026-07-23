@@ -1,0 +1,17 @@
+{
+  "schema": "act_plan#v1",
+  "target_act_seconds": 20.0,
+  "runtime_seconds": 10.0,
+  "acts": [
+    {
+      "id": "act-0",
+      "index": 0,
+      "title": "Act 1",
+      "summary": "Hero enters. \u2026 Exit into dark.",
+      "shot_start": 0,
+      "shot_end": 3,
+      "duration_sec": 10.0,
+      "token_budget": 8000
+    }
+  ]
+}
