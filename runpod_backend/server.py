@@ -145,7 +145,7 @@ def process_video_job(job_id: str, spec: dict):
         if sd_pipe:
             import torch
             # Generate image (Turbo needs 1-4 steps)
-            image = sd_pipe(prompt=character_prompt, num_inference_steps=2, guidance_scale=0.0, generator=torch.Generator("cuda").manual_seed(42)).images[0]
+            image = sd_pipe(prompt=character_prompt, num_inference_steps=4, guidance_scale=0.0, generator=torch.Generator("cuda").manual_seed(42)).images[0]
             # Remove background to get transparent PNG
             img_no_bg = remove(image)
             # Process character texture with alpha bbox crop, uniform scale, 30px margin & white background
@@ -267,7 +267,7 @@ def process_video_job(job_id: str, spec: dict):
                     import torch
                     audio = audioldm_pipe(
                         sfx_prompt,
-                        num_inference_steps=10,
+                        num_inference_steps=20,
                         audio_length_in_s=scene_duration,
                         generator=torch.Generator("cuda").manual_seed(42)
                     ).audios[0]
