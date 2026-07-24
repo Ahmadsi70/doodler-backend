@@ -202,7 +202,7 @@ def process_video_job(job_id: str, spec: dict):
 controller:
   MODE: video_render
   OUTPUT_VIDEO_PATH: {out_video_path}
-  OUTPUT_VIDEO_CODEC: avc1
+  OUTPUT_VIDEO_CODEC: mp4v
 ''')
                 
             render_cmd = [
