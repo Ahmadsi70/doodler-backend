@@ -231,84 +231,89 @@ elif st.session_state.phase == "render":
     status_text = st.empty()
     
     try:
-        status_text.text("مرحله ۱: ارسال سناریو به سرور پردازشی ابری...")
+        status_text.text("در حال اتصال به سرور مستقیم...")
         import requests
         import base64
         import json
         import time
 
-        RUNPOD_ENDPOINT_ID = "8j9wve4oi0mln9"
-        RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
+        RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "")
         
-        # We use the standard /run endpoint because rendering can take a minute
-        url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/run"
+        # We use the Pod proxy endpoint
+        url = f"https://{RUNPOD_ENDPOINT_ID}-8000.proxy.runpod.net/generate"
         
         headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {RUNPOD_API_KEY}"
+            "Content-Type": "application/json"
         }
         
         payload = {
-            "input": {
-                "spec": json.loads(spec.model_dump_json())
-            }
+            "spec": json.loads(spec.model_dump_json())
         }
         
         progress_bar.progress(30)
-        status_text.text("مرحله ۲: در حال ارسال درخواست به کارت گرافیک ۲۴ گیگابایتی...")
+        status_text.text("کارت گرافیک روشن شد! در حال رندر و ساخت انیمیشن (ممکن است چند دقیقه طول بکشد)...")
         
-        response = requests.post(url, headers=headers, json=payload, timeout=60)
-        response.raise_for_status()
-        result_json = response.json()
-        job_id = result_json.get("id")
+        # 1. Send the job to the queue
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
         
-        if not job_id:
-            st.error("سیستم موفق به دریافت تاییدیه از سرور نشد.")
+        if response.status_code != 200:
+            st.error(f"خطای سرور: {response.status_code} - {response.text}")
             st.stop()
             
-        progress_bar.progress(50)
+        result_json = response.json()
+        job_id = result_json.get("job_id")
         
-        # Polling for completion
-        completed = False
-        while not completed:
-            time.sleep(4)
-            poll_url = f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job_id}"
-            poll_resp = requests.get(poll_url, headers=headers, timeout=30)
-            status_data = poll_resp.json()
+        if not job_id:
+            st.error("سرور Job ID برنگرداند.")
+            st.stop()
             
-            status = status_data.get("status")
-            if status == "IN_QUEUE":
-                status_text.text("سرور در حال راه‌اندازی و قرارگیری در صف پردازش است...")
-            elif status == "IN_PROGRESS":
-                status_text.text("کارت گرافیک روشن شد! در حال رندر و ساخت انیمیشن...")
-                progress_bar.progress(75)
-            elif status == "COMPLETED":
-                completed = True
-                output = status_data.get("output", {})
-                if output.get("status") == "success":
-                    video_b64 = output.get("video_base64")
-                    if video_b64:
-                        video_bytes = base64.b64decode(video_b64)
-                        video_path = out_dir / "final_animation.mp4"
-                        with open(video_path, "wb") as f:
-                            f.write(video_bytes)
-                        
-                        progress_bar.progress(100)
-                        status_text.text("انیمیشن با موفقیت از ابر دانلود شد!")
-                        st.success("تمامی مراحل ساخت در فضای ابری به اتمام رسید.")
-                        
-                        st.video(str(video_path))
-                        st.balloons()
-                    else:
-                        st.error("سرور پیام موفقیت داد اما ویدیویی برنگرداند.")
-                else:
-                    st.error(f"خطا در پردازش هوش مصنوعی: {output.get('message')}")
-            elif status == "FAILED":
-                completed = True
-                st.error(f"پردازش روی سرور با خطا مواجه شد: {status_data.get('error')}")
-            else:
-                status_text.text(f"وضعیت نامشخص سرور: {status}")
+        status_text.text("درخواست با موفقیت در صف سرور قرار گرفت! کارت گرافیک روشن شد...")
+        progress_bar.progress(20)
+        
+        # 2. Polling for status
+        status_url = f"https://{RUNPOD_ENDPOINT_ID}-8000.proxy.runpod.net/status/{job_id}"
+        
+        while True:
+            time.sleep(5)
+            status_res = requests.get(status_url, timeout=10)
+            if status_res.status_code != 200:
+                st.warning("خطا در ارتباط با سرور، در حال تلاش مجدد...")
+                continue
                 
+            status_data = status_res.json()
+            status = status_data.get("status")
+            
+            if status == "processing":
+                # Create a moving progress bar effect
+                import random
+                current_prog = random.randint(30, 85)
+                progress_bar.progress(current_prog)
+                status_text.text("در حال رندر و ساخت انیمیشن (ممکن است چند دقیقه طول بکشد)...")
+            elif status == "completed":
+                break
+            elif status == "failed":
+                st.error(f"خطا در پردازش سرور: {status_data.get('error')}")
+                st.stop()
+        
+        progress_bar.progress(95)
+        
+        if status == "completed":
+            video_b64 = status_data.get("video_base64")
+            if video_b64:
+                video_bytes = base64.b64decode(video_b64)
+                video_path = out_dir / "final_animation.mp4"
+                with open(video_path, "wb") as f:
+                    f.write(video_bytes)
+                
+                progress_bar.progress(100)
+                status_text.text("انیمیشن با موفقیت پردازش شد!")
+                st.success("ویدیوی هوش مصنوعی شما با موفقیت ساخته شد.")
+                
+                st.video(str(video_path))
+                st.balloons()
+            else:
+                st.error("سرور پیام موفقیت فرستاد اما ویدیویی وجود ندارد.")
+            
         st.divider()
         if st.button("شروع ساخت انیمیشن جدید"):
             st.session_state.phase = "input"
