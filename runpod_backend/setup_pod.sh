@@ -13,9 +13,17 @@ fi
 
 # Download server code
 wget -O server.py https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/server.py
+# Clean up pre-installed packages that might cause uninstall errors or version conflicts
+rm -rf /usr/local/lib/python3.*/dist-packages/cryptography*
+rm -rf /usr/lib/python3/dist-packages/cryptography*
+rm -rf /usr/local/lib/python3.*/dist-packages/tokenizers*
+rm -rf /usr/lib/python3/dist-packages/tokenizers*
+rm -rf /usr/local/lib/python3.*/dist-packages/transformers*
+rm -rf /usr/local/lib/python3.*/dist-packages/diffusers*
+rm -rf /usr/local/lib/python3.*/dist-packages/huggingface_hub*
 
-# Install python dependencies
-pip install --ignore-installed cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
+# Install python dependencies safely
+pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
 
 echo "Setup complete! Starting the server..."
 # Run the server
