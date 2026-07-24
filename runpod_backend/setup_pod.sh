@@ -15,7 +15,7 @@ fi
 wget -O server.py https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/server.py
 
 # Install python dependencies
-pip install runpod diffusers transformers accelerate moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
+pip install --ignore-installed cryptography runpod diffusers transformers accelerate moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
 
 echo "Setup complete! Starting the server..."
 # Run the server
