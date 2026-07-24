@@ -3,7 +3,7 @@ echo "Setting up Doodler Backend on RunPod Pod..."
 
 # Update apt and install xvfb
 apt-get update
-apt-get install -y ffmpeg git wget libgl1-mesa-glx libglib2.0-0 xvfb
+apt-get install -y ffmpeg git wget libgl1 libglx-mesa0 libglib2.0-0 xvfb
 
 # Create workspace and clone AnimatedDrawings if it doesn't exist
 cd /workspace
