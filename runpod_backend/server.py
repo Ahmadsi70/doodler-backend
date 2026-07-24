@@ -177,22 +177,20 @@ def process_video_job(job_id: str, spec: dict):
             # 2a. Animate
             motion = scene.get('motion_type', 'jump')
             motion_mapping = {
-                "walk": "zombie",
-                "jump": "jumping",
-                "dance": "jesse_dance",
-                "wave": "wave_hello",
-                "dab": "dab",
-                "jumping_jacks": "jumping_jacks"
+                "walk": ("zombie", "fair1_spf"),
+                "jump": ("jumping", "fair1_spf"),
+                "dance": ("jesse_dance", "mixamo_fff"),
+                "wave": ("wave_hello", "fair1_spf"),
+                "dab": ("dab", "fair1_spf"),
+                "jumping_jacks": ("jumping_jacks", "cmu1_pfp")
             }
-            mapped_motion = motion_mapping.get(motion, "jumping")
+            mapped_motion, retarget_name = motion_mapping.get(motion, ("jumping", "fair1_spf"))
+            
             motion_yaml = f"/workspace/AnimatedDrawings/examples/config/motion/{mapped_motion}.yaml"
+            retarget_yaml = f"/workspace/AnimatedDrawings/examples/config/retarget/{retarget_name}.yaml"
             if not os.path.exists(motion_yaml):
                 motion_yaml = "/workspace/AnimatedDrawings/examples/config/motion/jumping.yaml"
-                
-            # Convert absolute motion_yaml to relative if needed, or just use relative path directly
-            motion_base = motion_yaml.replace("/workspace/AnimatedDrawings/", "")
-            if not motion_base.startswith("examples"):
-                motion_base = "examples/config/motion/jump.yaml"
+                retarget_yaml = "/workspace/AnimatedDrawings/examples/config/retarget/fair1_spf.yaml"
                 
             mvc_yaml = f"/tmp/mvc_{job_id}_{i}.yaml"
             with open(mvc_yaml, "w") as f:
@@ -200,7 +198,7 @@ def process_video_job(job_id: str, spec: dict):
   ANIMATED_CHARACTERS:
     - character_cfg: /workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml
       motion_cfg: {motion_yaml}
-      retarget_cfg: /workspace/AnimatedDrawings/examples/config/retarget/fair1_spf.yaml
+      retarget_cfg: {retarget_yaml}
 controller:
   MODE: video_render
   OUTPUT_VIDEO_PATH: {out_video_path}
