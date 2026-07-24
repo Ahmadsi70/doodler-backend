@@ -103,12 +103,20 @@ def handler(job):
             motion_yaml = "/workspace/AnimatedDrawings/examples/config/motion/jump.yaml"
             
         render_cmd = [
-            "python", "-m", "animated_drawings.render",
+            "xvfb-run", "-a", "python", "-m", "animated_drawings.render",
             ad_char_dir, motion_yaml, "/workspace/AnimatedDrawings/examples/config/retarget/fair1_ppf.yaml"
         ]
         
         # Run rendering
-        subprocess.run(render_cmd, cwd="/workspace/AnimatedDrawings")
+        print(f"Running command: {' '.join(render_cmd)}")
+        try:
+            result = subprocess.run(render_cmd, cwd="/workspace/AnimatedDrawings", capture_output=True, text=True, check=True)
+            print(f"Render stdout: {result.stdout}")
+        except subprocess.CalledProcessError as e:
+            print(f"Render failed with error code {e.returncode}")
+            print(f"Render stderr: {e.stderr}")
+            return {"status": "error", "error": f"AnimatedDrawings failed: {e.stderr}"}
+
         
         # AnimatedDrawings saves to video.mp4 in cwd by default or a specific out folder.
         # It actually saves to video.mp4 (or video.gif) in the current directory if not specified.
