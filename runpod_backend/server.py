@@ -201,6 +201,10 @@ def process_video_job(job_id: str, spec: dict):
     - character_cfg: /workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml
       motion_cfg: {motion_yaml}
       retarget_cfg: /workspace/AnimatedDrawings/examples/config/retarget/fair1_ppf.yaml
+controller:
+  MODE: video_render
+  OUTPUT_VIDEO_PATH: {out_video_path}
+  OUTPUT_VIDEO_CODEC: avc1
 ''')
                 
             render_cmd = [
@@ -222,10 +226,7 @@ def process_video_job(job_id: str, spec: dict):
                 JOBS[job_id] = {"status": "failed", "error": f"AnimatedDrawings exception: {str(e)}"}
                 return
                 
-            default_vid = "/workspace/AnimatedDrawings/video.mp4"
-            if os.path.exists(default_vid):
-                os.rename(default_vid, out_video_path)
-            else:
+            if not os.path.exists(out_video_path):
                 out_video_path = "mock"
                 
             # 2b. AudioLDM
