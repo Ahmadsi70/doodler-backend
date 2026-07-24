@@ -27,7 +27,7 @@ pip uninstall -y onnxruntime-gpu onnxruntime
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --upgrade
 
 # Install python dependencies safely
-pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime pyyaml matplotlib imageio shapely fastapi uvicorn pydantic PyOpenGL glfw scikit-learn
+pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile "numpy<2.0.0" pillow rembg onnxruntime pyyaml matplotlib imageio shapely fastapi uvicorn pydantic PyOpenGL glfw scikit-learn
 
 echo "Setup complete! Starting the server..."
 # Kill any existing server processes to avoid 'Address already in use' error
