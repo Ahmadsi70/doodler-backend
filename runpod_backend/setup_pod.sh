@@ -23,7 +23,7 @@ rm -rf /usr/local/lib/python3.*/dist-packages/diffusers*
 rm -rf /usr/local/lib/python3.*/dist-packages/huggingface_hub*
 
 # Install python dependencies safely
-pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
+pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" hf_transfer moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
 
 echo "Setup complete! Starting the server..."
 # Run the server
