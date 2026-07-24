@@ -138,8 +138,9 @@ def process_video_job(job_id: str, spec: dict):
         
         char_image_path = f"/tmp/character_{job_id}.png"
         if sd_pipe:
+            import torch
             # Generate image (Turbo needs 1-4 steps)
-            image = sd_pipe(prompt=character_prompt, num_inference_steps=2, guidance_scale=0.0).images[0]
+            image = sd_pipe(prompt=character_prompt, num_inference_steps=2, guidance_scale=0.0, generator=torch.Generator("cuda").manual_seed(42)).images[0]
             # Remove background to get transparent PNG
             img_no_bg = remove(image)
             # Paste on white background for AnimatedDrawings
@@ -224,7 +225,8 @@ def process_video_job(job_id: str, spec: dict):
             if sfx_prompt and audioldm_pipe:
                 print(f"Generating SFX: {sfx_prompt}")
                 try:
-                    audio = audioldm_pipe(sfx_prompt, num_inference_steps=10, audio_length_in_s=2.0).audios[0]
+                    import torch
+                    audio = audioldm_pipe(sfx_prompt, num_inference_steps=10, audio_length_in_s=2.0, generator=torch.Generator("cuda").manual_seed(42)).audios[0]
                     scipy.io.wavfile.write(out_audio_path, 16000, audio)
                 except Exception as e:
                     print(f"SFX Generation failed, ignoring: {e}")
@@ -258,5 +260,7 @@ def process_video_job(job_id: str, spec: dict):
         }
         
     except Exception as e:
-        print(f"Job {job_id} failed: {str(e)}")
-        JOBS[job_id] = {"status": "failed", "error": str(e)}
+        import traceback
+        err_msg = traceback.format_exc()
+        print(f"Error processing job {job_id}:\n{err_msg}")
+        JOBS[job_id] = {"status": "failed", "error": err_msg}
