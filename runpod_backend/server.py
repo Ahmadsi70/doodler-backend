@@ -15,6 +15,11 @@ import uuid
 
 app = FastAPI(title="Doodler AI Backend")
 
+try:
+    from runpod_backend.character_utils import build_strict_character_prompt, process_character_texture, generate_mvc_yaml
+except ImportError:
+    from character_utils import build_strict_character_prompt, process_character_texture, generate_mvc_yaml
+
 # ----------------- GLOBALS & INITIALIZATION -----------------
 VOLUME_PATH = "/runpod-volume/models"
 if not os.path.exists("/runpod-volume"):
@@ -116,7 +121,10 @@ async def get_status(job_id: str):
 
 def process_video_job(job_id: str, spec: dict):
     from rembg import remove
-    from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
+    try:
+        from moviepy import VideoFileClip, AudioFileClip, concatenate_videoclips
+    except ImportError:
+        from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
     
     try:
         print(f"Starting Job {job_id}")
@@ -129,10 +137,7 @@ def process_video_job(job_id: str, spec: dict):
         
         # 1. Image Generation
         print("Step 1: Generating Image via SDXL-Turbo")
-        character_prompt = "A character design on a solid white background. "
-        parts = spec.get("sketch", {}).get("parts", [])
-        for p in parts:
-            character_prompt += p.get("prompt", "") + ", "
+        character_prompt = build_strict_character_prompt(spec)
         
         print(f"Prompt: {character_prompt}")
         
@@ -143,13 +148,12 @@ def process_video_job(job_id: str, spec: dict):
             image = sd_pipe(prompt=character_prompt, num_inference_steps=2, guidance_scale=0.0, generator=torch.Generator("cuda").manual_seed(42)).images[0]
             # Remove background to get transparent PNG
             img_no_bg = remove(image)
-            # Paste on white background for AnimatedDrawings
-            final_img = Image.new("RGB", img_no_bg.size, (255, 255, 255))
-            final_img.paste(img_no_bg, mask=img_no_bg.split()[3])
+            # Process character texture with alpha bbox crop, uniform scale, 30px margin & white background
+            final_img = process_character_texture(img_no_bg, target_size=(512, 512), margin=30)
             final_img.save(char_image_path)
         else:
             # Fallback to a blank image
-            Image.new("RGB", (512, 512), (255,255,255)).save(char_image_path)
+            Image.new("RGB", (512, 512), (255, 255, 255)).save(char_image_path)
         
         # Override char1's texture with our new image (MVP rig hack)
         ad_char_dir = "/workspace/AnimatedDrawings/examples/characters/char1"
@@ -162,8 +166,13 @@ def process_video_job(job_id: str, spec: dict):
                     cfg = yaml.safe_load(f)
                     h = cfg.get("height", 602)
                     w = cfg.get("width", 454)
-            im = Image.open(char_image_path).resize((w, h))
-            im.save(os.path.join(ad_char_dir, "texture.png"))
+            if sd_pipe:
+                texture_img = process_character_texture(img_no_bg, target_size=(w, h), margin=30)
+            else:
+                texture_img = Image.open(char_image_path)
+                if texture_img.size != (w, h):
+                    texture_img = texture_img.resize((w, h))
+            texture_img.save(os.path.join(ad_char_dir, "texture.png"))
         
         # 2. Process Timeline
         scenes = spec.get('timeline', {}).get('scenes', [])
@@ -193,17 +202,20 @@ def process_video_job(job_id: str, spec: dict):
                 retarget_yaml = "/workspace/AnimatedDrawings/examples/config/retarget/fair1_spf.yaml"
                 
             mvc_yaml = f"/tmp/mvc_{job_id}_{i}.yaml"
+            yaml_content = generate_mvc_yaml(
+                character_cfg="/workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml",
+                motion_cfg=motion_yaml,
+                retarget_cfg=retarget_yaml,
+                output_video_path=out_video_path,
+                window_dimensions=(1080, 1080),
+                camera_pos=[0.0, 0.0, 3.5],
+                camera_fwd=[0.0, 0.0, -1.0],
+                clear_color=[1.0, 1.0, 1.0, 1.0],
+                char_starting_location=[0.0, 0.0, 0.0],
+                scale=1.0,
+            )
             with open(mvc_yaml, "w") as f:
-                f.write(f'''scene:
-  ANIMATED_CHARACTERS:
-    - character_cfg: /workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml
-      motion_cfg: {motion_yaml}
-      retarget_cfg: {retarget_yaml}
-controller:
-  MODE: video_render
-  OUTPUT_VIDEO_PATH: {out_video_path}
-  OUTPUT_VIDEO_CODEC: mp4v
-''')
+                f.write(yaml_content)
                 
             render_cmd = [
                 "xvfb-run", "-a", "python", "-m", "animated_drawings.render", mvc_yaml
@@ -227,25 +239,64 @@ controller:
             if not os.path.exists(out_video_path):
                 out_video_path = "mock"
                 
-            # 2b. AudioLDM
-            sfx_prompt = scene.get('sfx_prompt', "")
-            if sfx_prompt and audioldm_pipe:
-                print(f"Generating SFX: {sfx_prompt}")
-                try:
-                    import torch
-                    audio = audioldm_pipe(sfx_prompt, num_inference_steps=10, audio_length_in_s=2.0, generator=torch.Generator("cuda").manual_seed(42)).audios[0]
-                    scipy.io.wavfile.write(out_audio_path, 16000, audio)
-                except Exception as e:
-                    print(f"SFX Generation failed, ignoring: {e}")
-                    
+            # Determine dynamic scene duration
+            clip = None
+            scene_duration = None
             if out_video_path != "mock":
                 try:
                     clip = VideoFileClip(out_video_path)
+                    if clip.duration and clip.duration > 0:
+                        scene_duration = float(clip.duration)
+                except Exception as e:
+                    print(f"Error reading video clip duration: {e}")
+            
+            if scene_duration is None:
+                start_t = float(scene.get('start_time', 0.0))
+                end_t = float(scene.get('end_time', 0.0))
+                if end_t > start_t:
+                    scene_duration = end_t - start_t
+                else:
+                    scene_duration = 2.0
+                    
+            # 2b. AudioLDM / Sound Generation with dynamic audio_length_in_s
+            sfx_prompt = scene.get('sfx_prompt', "")
+            audio_generated = False
+            if sfx_prompt and str(sfx_prompt).strip() and audioldm_pipe:
+                print(f"Generating SFX: {sfx_prompt} (duration: {scene_duration}s)")
+                try:
+                    import torch
+                    audio = audioldm_pipe(
+                        sfx_prompt,
+                        num_inference_steps=10,
+                        audio_length_in_s=scene_duration,
+                        generator=torch.Generator("cuda").manual_seed(42)
+                    ).audios[0]
+                    scipy.io.wavfile.write(out_audio_path, 16000, audio)
+                    audio_generated = True
+                except Exception as e:
+                    print(f"SFX Generation failed, fallback to silent audio: {e}")
+
+            if not audio_generated:
+                print(f"Injecting silent audio fallback for scene {i} (duration: {scene_duration}s)")
+                silent_audio = np.zeros(int(16000 * scene_duration), dtype=np.float32)
+                scipy.io.wavfile.write(out_audio_path, 16000, silent_audio)
+                    
+            if out_video_path != "mock":
+                try:
+                    if clip is None:
+                        clip = VideoFileClip(out_video_path)
                     if os.path.exists(out_audio_path):
-                        from moviepy.audio.fx.audio_loop import audio_loop
                         audio_clip = AudioFileClip(out_audio_path)
-                        audio_clip = audio_loop(audio_clip, duration=clip.duration)
-                        clip = clip.set_audio(audio_clip)
+                        if audio_clip.duration < clip.duration:
+                            try:
+                                from moviepy.audio.fx.audio_loop import audio_loop
+                                audio_clip = audio_loop(audio_clip, duration=clip.duration)
+                            except Exception:
+                                audio_clip = audio_clip.with_duration(clip.duration) if hasattr(audio_clip, 'with_duration') else audio_clip.set_duration(clip.duration)
+                        elif audio_clip.duration > clip.duration:
+                            audio_clip = audio_clip.subclip(0, clip.duration) if hasattr(audio_clip, 'subclip') else audio_clip.subclipped(0, clip.duration)
+                        
+                        clip = clip.with_audio(audio_clip) if hasattr(clip, 'with_audio') else clip.set_audio(audio_clip)
                     video_clips.append(clip)
                 except Exception as e:
                     print(f"Moviepy error: {e}")
