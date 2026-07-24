@@ -26,5 +26,10 @@ rm -rf /usr/local/lib/python3.*/dist-packages/huggingface_hub*
 pip install cryptography runpod diffusers==0.27.2 transformers==4.38.2 accelerate==0.28.0 "huggingface-hub<=0.23.0" moviepy==1.0.3 opencv-python scipy soundfile numpy pillow rembg onnxruntime-gpu pyyaml matplotlib imageio shapely fastapi uvicorn pydantic
 
 echo "Setup complete! Starting the server..."
+# Kill any existing server processes to avoid 'Address already in use' error
+pkill -f "server.py" || true
+pkill -f "uvicorn" || true
+sleep 1
+
 # Run the server
 uvicorn server:app --host 0.0.0.0 --port 8000 --reload
