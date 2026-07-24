@@ -154,7 +154,15 @@ def process_video_job(job_id: str, spec: dict):
         # Override char1's texture with our new image (MVP rig hack)
         ad_char_dir = "/workspace/AnimatedDrawings/examples/characters/char1"
         if os.path.exists(ad_char_dir):
-            im = Image.open(char_image_path).resize((512, 512))
+            import yaml
+            cfg_path = os.path.join(ad_char_dir, "char_cfg.yaml")
+            w, h = 454, 602
+            if os.path.exists(cfg_path):
+                with open(cfg_path, "r") as f:
+                    cfg = yaml.safe_load(f)
+                    h = cfg.get("height", 602)
+                    w = cfg.get("width", 454)
+            im = Image.open(char_image_path).resize((w, h))
             im.save(os.path.join(ad_char_dir, "texture.png"))
         
         # 2. Process Timeline
