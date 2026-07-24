@@ -155,6 +155,9 @@ async def generate_video(request: Request):
         except subprocess.CalledProcessError as e:
             print(f"Render failed with error code {e.returncode}")
             return JSONResponse(status_code=500, content={"error": f"AnimatedDrawings failed: {e.stderr}"})
+        except Exception as e:
+            print(f"Render exception: {e}")
+            return JSONResponse(status_code=500, content={"error": f"AnimatedDrawings exception: {str(e)}"})
             
         default_vid = "/workspace/AnimatedDrawings/video.mp4"
         if os.path.exists(default_vid):
