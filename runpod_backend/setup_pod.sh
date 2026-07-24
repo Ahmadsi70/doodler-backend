@@ -11,8 +11,8 @@ if [ ! -d "AnimatedDrawings" ]; then
     git clone https://github.com/facebookresearch/AnimatedDrawings.git
 fi
 
-# Download server code
-wget -O server.py https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/server.py
+# Download server code with cache buster
+wget -O server.py "https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/server.py?t=$RANDOM"
 # Clean up pre-installed packages that might cause uninstall errors or version conflicts
 rm -rf /usr/local/lib/python3.*/dist-packages/cryptography*
 rm -rf /usr/lib/python3/dist-packages/cryptography*
