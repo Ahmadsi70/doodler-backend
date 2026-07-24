@@ -36,4 +36,4 @@ pkill -f "uvicorn" || true
 sleep 1
 
 # Run the server
-uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+xvfb-run -a uvicorn server:app --host 0.0.0.0 --port 8000 --reload
