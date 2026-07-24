@@ -242,9 +242,10 @@ controller:
                 try:
                     clip = VideoFileClip(out_video_path)
                     if os.path.exists(out_audio_path):
-                        audioclip = AudioFileClip(out_audio_path)
-                        audioclip = audioclip.set_duration(clip.duration)
-                        clip = clip.set_audio(audioclip)
+                        from moviepy.audio.fx.audio_loop import audio_loop
+                        audio_clip = AudioFileClip(out_audio_path)
+                        audio_clip = audio_loop(audio_clip, duration=clip.duration)
+                        clip = clip.set_audio(audio_clip)
                     video_clips.append(clip)
                 except Exception as e:
                     print(f"Moviepy error: {e}")
