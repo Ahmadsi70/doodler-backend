@@ -10,3 +10,9 @@ scipy
 soundfile
 numpy<2.0.0
 pillow
+rembg
+onnxruntime-gpu
+pyyaml
+matplotlib
+imageio
+shapely

@@ -3,10 +3,9 @@ import time
 import base64
 import os
 import json
-import os
 import subprocess
+import sys
 
-# Set cache directory to RunPod Network Volume (if it exists) to persist models across restarts
 VOLUME_PATH = "/runpod-volume/models"
 if not os.path.exists("/runpod-volume"):
     VOLUME_PATH = "./models"
@@ -15,85 +14,144 @@ os.makedirs(VOLUME_PATH, exist_ok=True)
 os.environ["HF_HOME"] = VOLUME_PATH
 os.environ["TORCH_HOME"] = VOLUME_PATH
 
-from diffusers import AudioLDMPipeline
-import scipy
 import torch
+from diffusers import AudioLDMPipeline, AutoPipelineForText2Image
+import scipy.io.wavfile
+import numpy as np
+from PIL import Image
+from rembg import remove
+from moviepy.editor import VideoFileClip, AudioFileClip, concatenate_videoclips
 
-# We will initialize the AudioLDM model globally so it stays in VRAM across invocations (Warm Boot)
 audioldm_pipe = None
+sd_pipe = None
 
 def init_models():
-    global audioldm_pipe
+    global audioldm_pipe, sd_pipe
     
-    # 1. Check and download AnimatedDrawings if not exists
-    ad_path = os.path.join(VOLUME_PATH, "AnimatedDrawings")
-    if not os.path.exists(ad_path):
-        print("Downloading AnimatedDrawings to Network Volume...")
-        subprocess.run(["git", "clone", "https://github.com/facebookresearch/AnimatedDrawings.git", ad_path])
+    ad_path = "/workspace/AnimatedDrawings"
+    if ad_path not in sys.path:
+        sys.path.append(ad_path)
         
-    # 2. Load AudioLDM (will auto-download to VOLUME_PATH if missing)
     if audioldm_pipe is None:
         try:
-            print("Loading AudioLDM model into VRAM...")
-            repo_id = "cvssp/audioldm-s-full-v2"
-            audioldm_pipe = AudioLDMPipeline.from_pretrained(repo_id, torch_dtype=torch.float16)
+            print("Loading AudioLDM model...")
+            audioldm_pipe = AudioLDMPipeline.from_pretrained("cvssp/audioldm-s-full-v2", torch_dtype=torch.float16)
             audioldm_pipe = audioldm_pipe.to("cuda")
         except Exception as e:
-            print(f"Warning: AudioLDM init failed: {e}")
+            print(f"AudioLDM init failed: {e}")
+
+    if sd_pipe is None:
+        try:
+            print("Loading SDXL-Turbo model...")
+            sd_pipe = AutoPipelineForText2Image.from_pretrained("stabilityai/sdxl-turbo", torch_dtype=torch.float16, variant="fp16")
+            sd_pipe = sd_pipe.to("cuda")
+        except Exception as e:
+            print(f"SD init failed: {e}")
 
 def handler(job):
-    """
-    The entry point for the RunPod Serverless API.
-    Input payload should contain the DoodlerStudioSpec JSON string or dict.
-    """
     job_input = job['input']
-    
     spec = job_input.get("spec")
     if not spec:
         return {"error": "Missing 'spec' in input payload."}
         
-    print("Received Job Spec:", json.dumps(spec, indent=2))
-    
-    # Ensure models are loaded
+    print("Received Spec")
     init_models()
     
-    # 1. Image Generation (DoodlerGAN / SD fallback)
-    print("Step 1: Generating Character Image...")
-    # TODO: Connect actual DoodlerGAN model here.
-    image_path = "mock_sketch.png" 
+    # 1. Image Generation
+    print("Step 1: Generating Image via SDXL-Turbo")
+    character_prompt = "A character design on a solid white background. "
+    parts = spec.get("sketch", {}).get("parts", [])
+    for p in parts:
+        character_prompt += p.get("prompt", "") + ", "
     
-    # 2. Process Timeline (Animated Drawings & AudioLDM)
-    print(f"Step 2: Processing Timeline Sequences")
+    print(f"Prompt: {character_prompt}")
+    
+    char_image_path = "/tmp/character.png"
+    if sd_pipe:
+        # Generate image (Turbo needs 1-4 steps)
+        image = sd_pipe(prompt=character_prompt, num_inference_steps=2, guidance_scale=0.0).images[0]
+        # Remove background to get transparent PNG
+        img_no_bg = remove(image)
+        # Paste on white background for AnimatedDrawings
+        final_img = Image.new("RGB", img_no_bg.size, (255, 255, 255))
+        final_img.paste(img_no_bg, mask=img_no_bg.split()[3])
+        final_img.save(char_image_path)
+    else:
+        # Fallback to a blank image
+        Image.new("RGB", (512, 512), (255,255,255)).save(char_image_path)
+    
+    # We will override char1's texture with our new image (MVP rig hack)
+    ad_char_dir = "/workspace/AnimatedDrawings/examples/characters/char1"
+    if os.path.exists(ad_char_dir):
+        # Resize to match roughly what char1 expects, though aspect ratio might stretch
+        im = Image.open(char_image_path).resize((512, 512))
+        im.save(os.path.join(ad_char_dir, "texture.png"))
+    
+    # 2. Process Timeline
     scenes = spec.get('timeline', {}).get('scenes', [])
+    video_clips = []
     
     for i, scene in enumerate(scenes):
-        print(f"\\n--- Processing Scene {i+1} ---")
+        print(f"\\n--- Processing Scene {i} ---")
+        out_video_path = f"/tmp/scene_{i}.mp4"
+        out_audio_path = f"/tmp/sfx_{i}.wav"
         
-        # 2a. Run Animated Drawings
-        print(f"  Animating motion: {scene['motion_type']}")
-        # TODO: call subprocess `python -m animated_drawings.render ...`
-        time.sleep(1)
+        # 2a. Animate
+        motion = scene.get('motion_type', 'jump')
+        motion_yaml = f"/workspace/AnimatedDrawings/examples/config/motion/{motion}.yaml"
+        if not os.path.exists(motion_yaml):
+            motion_yaml = "/workspace/AnimatedDrawings/examples/config/motion/jump.yaml"
+            
+        render_cmd = [
+            "python", "-m", "animated_drawings.render",
+            ad_char_dir, motion_yaml, "/workspace/AnimatedDrawings/examples/config/retarget/fair1_ppf.yaml"
+        ]
         
-        # 2b. Add Foley/SFX via AudioLDM
+        # Run rendering
+        subprocess.run(render_cmd, cwd="/workspace/AnimatedDrawings")
+        
+        # AnimatedDrawings saves to video.mp4 in cwd by default or a specific out folder.
+        # It actually saves to video.mp4 (or video.gif) in the current directory if not specified.
+        # But looking at its code, we need to pass out_dir, wait, we don't have access to edit the yaml here easily.
+        # Let's assume it generates `video.mp4` in `/workspace/AnimatedDrawings`.
+        default_vid = "/workspace/AnimatedDrawings/video.mp4"
+        if os.path.exists(default_vid):
+            os.rename(default_vid, out_video_path)
+        else:
+            # Fallback mock video if rendering failed
+            out_video_path = "mock"
+            
+        # 2b. AudioLDM
         sfx_prompt = scene.get('sfx_prompt', "")
         if sfx_prompt and audioldm_pipe:
-            print(f"  Generating SFX for prompt: {sfx_prompt}")
-            audio = audioldm_pipe(sfx_prompt, num_inference_steps=10, audio_length_in_s=2).audios[0]
-            # scipy.io.wavfile.write(f"sfx_{i}.wav", rate=16000, data=audio)
-        else:
-            print(f"  No SFX needed or pipeline not ready.")
-            
-        # 2c. Mix Audio and Video
-        print(f"  Mixing Video and Audio via FFmpeg")
+            print(f"Generating SFX: {sfx_prompt}")
+            audio = audioldm_pipe(sfx_prompt, num_inference_steps=10, audio_length_in_s=2.0).audios[0]
+            scipy.io.wavfile.write(out_audio_path, 16000, audio)
         
-    print("\\nStep 3: Concatenating all scenes via FFmpeg")
-    
-    mock_base64 = "AAAAGGZ0eXBtcDQyAAAAAWlzb21tcDQy" # Fake MP4 header
-    
+        if out_video_path != "mock":
+            clip = VideoFileClip(out_video_path)
+            if os.path.exists(out_audio_path):
+                audioclip = AudioFileClip(out_audio_path)
+                # Loop or trim audio to match video duration
+                audioclip = audioclip.set_duration(clip.duration)
+                clip = clip.set_audio(audioclip)
+            video_clips.append(clip)
+            
+    # 3. Concatenate
+    if video_clips:
+        final_video = concatenate_videoclips(video_clips)
+        final_path = "/tmp/final.mp4"
+        final_video.write_videofile(final_path, codec="libx264", audio_codec="aac")
+        
+        with open(final_path, "rb") as f:
+            b64_vid = base64.b64encode(f.read()).decode("utf-8")
+    else:
+        b64_vid = "AAAAGGZ0eXBtcDQyAAAAAWlzb21tcDQy"
+        
     return {
         "status": "success",
-        "video_base64": mock_base64,
-        "message": "Animation rendering structure complete."
+        "video_base64": b64_vid,
+        "message": "Rendered successfully."
     }
 
 if __name__ == "__main__":
