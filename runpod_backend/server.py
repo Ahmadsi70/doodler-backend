@@ -34,7 +34,7 @@ def init_models():
     
     ad_path = "/workspace/AnimatedDrawings"
     if ad_path not in sys.path:
-        sys.path.append(ad_path)
+        sys.path.insert(0, ad_path)
         
     if audioldm_pipe is None:
         try:
@@ -70,8 +70,9 @@ def health_check():
 @app.get("/debug")
 def debug_info():
     import glob
+    import animated_drawings
     motions = glob.glob("/workspace/AnimatedDrawings/examples/config/motion/*.yaml")
-    return {"motions": motions}
+    return {"motions": motions, "ad_path": animated_drawings.__file__}
 
 @app.post("/update_code")
 async def update_code(request: Request):
@@ -179,9 +180,9 @@ def process_video_job(job_id: str, spec: dict):
             with open(mvc_yaml, "w") as f:
                 f.write(f'''scene:
   ANIMATED_CHARACTERS:
-    - character_cfg: examples/characters/char1/char_cfg.yaml
-      motion_cfg: {motion_base}
-      retarget_cfg: examples/config/retarget/fair1_ppf.yaml
+    - character_cfg: /workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml
+      motion_cfg: {motion_yaml}
+      retarget_cfg: /workspace/AnimatedDrawings/examples/config/retarget/fair1_ppf.yaml
 ''')
                 
             render_cmd = [
@@ -191,7 +192,9 @@ def process_video_job(job_id: str, spec: dict):
             # Run rendering
             print(f"Running command: {' '.join(render_cmd)}")
             try:
-                result = subprocess.run(render_cmd, cwd="/workspace/AnimatedDrawings", capture_output=True, text=True, check=True)
+                env = os.environ.copy()
+                env["PYTHONPATH"] = "/workspace/AnimatedDrawings"
+                result = subprocess.run(render_cmd, cwd="/workspace/AnimatedDrawings", env=env, capture_output=True, text=True, check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Render failed with error code {e.returncode}")
                 JOBS[job_id] = {"status": "failed", "error": f"AnimatedDrawings failed: stderr={e.stderr}, stdout={e.stdout}"}
