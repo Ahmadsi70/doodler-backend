@@ -23,12 +23,12 @@ if str(_ROOT) not in sys.path:
 from agents.studio_graph import process_chat_graph
 from doodler_ir import DoodlerStudioSpec, SketchSequence, TimelineSequence, SketchBrief
 
-RUNPOD_ENDPOINT_ID = "8j9wve4oi0mln9"
+RUNPOD_ENDPOINT_ID = os.environ.get("RUNPOD_ENDPOINT_ID", "vsna6er9qjdx8d")
 import os
 RUNPOD_API_KEY = os.environ.get("RUNPOD_API_KEY", "")
 
 def run_e2e_test():
-    test_story = "یک سگ بامزه که راه میره و بعد میپره بالا و خوشحالی میکنه"
+    test_story = "A cute dog jumping and acting happy"
     logger.info(f"=== E2E TEST STARTED ===")
     logger.info(f"Test Story: {test_story}")
     
@@ -77,9 +77,14 @@ def run_e2e_test():
         "Authorization": f"Bearer {RUNPOD_API_KEY}"
     }
     
+    spec_dict = json.loads(payload_json)
+    if "timeline" in spec_dict and "scenes" in spec_dict["timeline"]:
+        for scene in spec_dict["timeline"]["scenes"]:
+            scene["sfx_prompt"] = ""
+            
     payload = {
         "input": {
-            "spec": json.loads(payload_json)
+            "spec": spec_dict
         }
     }
     

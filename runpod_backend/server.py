@@ -167,9 +167,18 @@ def process_video_job(job_id: str, spec: dict):
             
             # 2a. Animate
             motion = scene.get('motion_type', 'jump')
-            motion_yaml = f"/workspace/AnimatedDrawings/examples/config/motion/{motion}.yaml"
+            motion_mapping = {
+                "walk": "zombie",
+                "jump": "jumping",
+                "dance": "jesse_dance",
+                "wave": "wave_hello",
+                "dab": "dab",
+                "jumping_jacks": "jumping_jacks"
+            }
+            mapped_motion = motion_mapping.get(motion, "jumping")
+            motion_yaml = f"/workspace/AnimatedDrawings/examples/config/motion/{mapped_motion}.yaml"
             if not os.path.exists(motion_yaml):
-                motion_yaml = "/workspace/AnimatedDrawings/examples/config/motion/jump.yaml"
+                motion_yaml = "/workspace/AnimatedDrawings/examples/config/motion/jumping.yaml"
                 
             # Convert absolute motion_yaml to relative if needed, or just use relative path directly
             motion_base = motion_yaml.replace("/workspace/AnimatedDrawings/", "")

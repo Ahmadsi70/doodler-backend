@@ -20,7 +20,9 @@ def plan_sketch_parts(brief: SketchBrief) -> SketchSequence:
     3. "parts": A list of objects, each with "part_type" and "prompt".
     """
     
-    data = chat_json(role="narrative", system="You are a Sketch Planner.", user=prompt) or {}
+    data = chat_json(role="narrative", system="You are a Sketch Planner.", user=prompt)
+    if not data or not data.get("parts"):
+        raise ValueError("LLM returned empty or invalid sketch data")
     
     parts = []
     for i, p in enumerate(data.get("parts", [])):

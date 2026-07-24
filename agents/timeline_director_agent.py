@@ -36,11 +36,26 @@ def direct_timeline(sketch: SketchSequence, target_duration: int = 15) -> Timeli
         scenes.append(AnimationScene(start_time=0.0, end_time=5.0, motion_type="idle", sfx_prompt="wind blowing"))
     else:
         for s in scenes_data:
+            try:
+                st = float(s.get("start_time", 0.0))
+                et = float(s.get("end_time", 5.0))
+            except (ValueError, TypeError):
+                st, et = 0.0, 5.0
+            
             scenes.append(AnimationScene(
-                start_time=float(s.get("start_time", 0.0)),
-                end_time=float(s.get("end_time", 5.0)),
+                start_time=st,
+                end_time=et,
                 motion_type=s.get("motion_type", "idle"),
                 sfx_prompt=s.get("sfx_prompt", "")
             ))
+            
+    # Mathematically ensure the total duration matches target_duration exactly
+    if scenes:
+        total_dur = max(s.end_time for s in scenes)
+        if total_dur > 0 and abs(total_dur - target_duration) > 0.01:
+            scale = target_duration / total_dur
+            for s in scenes:
+                s.start_time *= scale
+                s.end_time *= scale
             
     return TimelineSequence(scenes=scenes)
