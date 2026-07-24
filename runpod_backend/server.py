@@ -200,7 +200,7 @@ def process_video_job(job_id: str, spec: dict):
   ANIMATED_CHARACTERS:
     - character_cfg: /workspace/AnimatedDrawings/examples/characters/char1/char_cfg.yaml
       motion_cfg: {motion_yaml}
-      retarget_cfg: /workspace/AnimatedDrawings/examples/config/retarget/fair1_ppf.yaml
+      retarget_cfg: /workspace/AnimatedDrawings/examples/config/retarget/fair1_spf.yaml
 controller:
   MODE: video_render
   OUTPUT_VIDEO_PATH: {out_video_path}
