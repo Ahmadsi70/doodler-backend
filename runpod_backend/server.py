@@ -144,6 +144,8 @@ def process_video_job(job_id: str, spec: dict):
         char_image_path = f"/tmp/character_{job_id}.png"
         if sd_pipe:
             import torch
+            # Force all model components onto CUDA (fixes race condition from background thread loading)
+            sd_pipe.to("cuda")
             # Generate image (Turbo needs 1-4 steps)
             image = sd_pipe(prompt=character_prompt, num_inference_steps=4, guidance_scale=0.0, generator=torch.Generator("cuda").manual_seed(42)).images[0]
             # Remove background to get transparent PNG
