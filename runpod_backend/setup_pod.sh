@@ -13,6 +13,7 @@ fi
 
 # Download server code with cache buster
 wget -O server.py "https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/server.py?t=$RANDOM"
+wget -O character_utils.py "https://raw.githubusercontent.com/ahmadsi70/doodler-backend/main/runpod_backend/character_utils.py?t=$RANDOM"
 # Clean up pre-installed packages that might cause uninstall errors or version conflicts
 rm -rf /usr/local/lib/python3.*/dist-packages/cryptography*
 rm -rf /usr/lib/python3/dist-packages/cryptography*
