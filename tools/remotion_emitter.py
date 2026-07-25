@@ -1,45 +1,18 @@
-"""Launch local Remotion renders into a job workspace ``render.mp4``."""
+"""Generate ``story_props.json`` — the data contract consumed by Remotion compositions.
+
+This is the ONLY output this module produces. Code (not video) is the deliverable;
+users copy the Remotion project and run ``npm install && npx remotion render`` themselves.
+"""
 
 from __future__ import annotations
 
 import json
-import os
 import shutil
-import subprocess
 from pathlib import Path
 from typing import Any
 
 _ROOT = Path(__file__).resolve().parents[1]
 _REMOTION = _ROOT / "remotion"
-
-
-def remotion_ready() -> bool:
-    return (_REMOTION / "node_modules" / "remotion").is_dir() and (
-        _REMOTION / "package.json"
-    ).is_file()
-
-
-def _remotion_cli_cmd() -> list[str]:
-    """
-    Resolve Remotion CLI for subprocess (Windows needs ``.cmd``; bare ``npx`` fails).
-    Prefer local ``node_modules/.bin``, then ``npx.cmd`` / ``npx``, then node entry.
-    """
-    bin_dir = _REMOTION / "node_modules" / ".bin"
-    for name in ("remotion.cmd", "remotion"):
-        local = bin_dir / name
-        if local.is_file():
-            return [str(local)]
-    for name in ("npx.cmd", "npx"):
-        found = shutil.which(name)
-        if found:
-            return [found, "--yes", "remotion"]
-    cli_js = _REMOTION / "node_modules" / "@remotion" / "cli" / "remotion-cli.js"
-    node = shutil.which("node")
-    if node and cli_js.is_file():
-        return [node, str(cli_js)]
-    raise RuntimeError(
-        "Remotion CLI not found. cd C:\\Users\\badri\\Story\\remotion && npm install"
-    )
 
 
 _GRADE_PALETTES: dict[str, dict[str, str]] = {
@@ -113,6 +86,7 @@ def write_story_composition_props(
     character_layers: dict[str, Any] | None = None,
     title: str = "Story",
     sync_remotion_public: bool = True,
+    frame_pipeline_state: dict[str, Any] | None = None,
 ) -> Path:
     """Write ``story_props.json`` consumed by Remotion Composition."""
     out = Path(out_dir)
@@ -343,7 +317,10 @@ def write_story_composition_props(
         )
         prev_beat = beat
 
+    # ── Frame agents ────────────────────────────────────────────────
     # Frame agents P0–P2: chart → loco → contact → lead → camera → edges → audio/foley → gates
+    # When frame_pipeline_state is provided, use pre-computed artifacts.
+    fps_local = 24
     performance_chart: dict[str, Any] | None = None
     contact_lock: dict[str, Any] | None = None
     locomotion_cycles: dict[str, Any] | None = None
@@ -354,205 +331,256 @@ def write_story_composition_props(
     phoneme_sync: dict[str, Any] | None = None
     compliance_frame: dict[str, Any] | None = None
     frame_gate: dict[str, Any] | None = None
-    try:
-        from agents.performance_chart_agent import (
-            chart_shot_to_rig,
-            run_performance_chart_agent,
-        )
-        from agents.contact_lock_agent import run_contact_lock_agent
-        from agents.locomotion_cycle_agent import (
-            apply_locomotion_to_chart,
-            run_locomotion_cycle_agent,
-        )
-        from agents.camera_curve_agent import curve_for_shot, run_camera_curve_agent
-        from agents.transition_edge_agent import (
-            run_transition_edge_agent,
-            transition_in_for_shot,
-        )
-        from agents.foley_timeline_agent import (
-            merge_foley_into_audio_timeline,
-            run_foley_timeline_agent,
-        )
-        from agents.acting_lead_agent import (
-            apply_acting_lead_to_chart,
-            expression_curve_for_shot,
-            run_acting_lead_agent,
-        )
-        from agents.phoneme_sync_agent import (
-            merge_mouth_into_expression_curve,
-            mouth_curve_for_shot,
-            run_phoneme_sync_agent,
-        )
-        from agents.compliance_frame_agent import run_compliance_frame_agent
-        from agents.audio_cue_agent import run_audio_cue_agent
-        from tools.audio_cues import build_audio_timeline_from_plan, sync_cues_to_remotion_public
-        from tools.frame_gate import run_frame_gate
+    audio_timeline: dict[str, Any] | None = None
+    _frame_agent_error: str | None = None
 
-        chart_input = []
-        for s in shots:
-            sfx = list(s.get("sfx") or [])
-            if not sfx:
-                try:
-                    from agents.audio_cue_agent import load_audio_catalog
-                    from agents.sfx_plan import infer_sfx_events
-                    from tools.audio_cues import ensure_audio_cue_files
+    if frame_pipeline_state:
+        fps_local = frame_pipeline_state.get("fps", 24)
+        performance_chart = frame_pipeline_state.get("performance_chart")
+        contact_lock = frame_pipeline_state.get("contact_lock")
+        locomotion_cycles = frame_pipeline_state.get("locomotion_cycles")
+        camera_curves = frame_pipeline_state.get("camera_curves")
+        transition_edges = frame_pipeline_state.get("transition_edges")
+        foley_timeline = frame_pipeline_state.get("foley_timeline")
+        acting_lead = frame_pipeline_state.get("acting_lead")
+        phoneme_sync = frame_pipeline_state.get("phoneme_sync")
+        compliance_frame = frame_pipeline_state.get("compliance_frame")
+        frame_gate = frame_pipeline_state.get("frame_gate")
+        audio_timeline = frame_pipeline_state.get("audio_timeline")
+        _frame_agent_error = frame_pipeline_state.get("error")
+        # Apply pre-computed artifacts to shots
+        if performance_chart:
+            try:
+                from agents.performance_chart_agent import chart_shot_to_rig
+                from agents.camera_curve_agent import curve_for_shot
+                from agents.transition_edge_agent import transition_in_for_shot
+                from agents.acting_lead_agent import expression_curve_for_shot
+                from agents.phoneme_sync_agent import mouth_curve_for_shot, merge_mouth_into_expression_curve
 
-                    ensure_audio_cue_files()
-                    sfx = infer_sfx_events(
-                        str(s.get("action") or ""),
-                        beat=str(s.get("storyBeat") or ""),
-                        catalog_cues=dict(load_audio_catalog().get("cues") or {}),
-                    )
-                except Exception:  # noqa: BLE001
-                    sfx = []
-            chart_input.append(
-                {
-                    "shot_id": s.get("shotId"),
-                    "story_beat": s.get("storyBeat"),
-                    "pose": (s.get("craftHints") or {}).get("rig", {}).get("pose")
-                    or "idle",
-                    "expression": (s.get("craftHints") or {}).get("rig", {}).get(
-                        "expression"
-                    )
-                    or "neutral",
-                    "action": s.get("action"),
-                    "dialogue": s.get("dialogue") or "",
-                    "vo_path": s.get("voPath") or "",
-                    "duration_frames": s.get("durationFrames"),
-                    "anticipation_frames": s.get("anticipationFrames"),
-                    "hold_frames": s.get("holdFrames"),
-                    "camera": s.get("camera"),
-                    "camera_move": s.get("cameraMove"),
-                    "sfx": sfx,
-                }
-            )
-        # Resolve VO wav durations before phoneme sync
+                chart_by_id = {s.get("shot_id"): s for s in performance_chart.get("shots") or []}
+                for s in shots:
+                    ch = chart_by_id.get(s.get("shotId"))
+                    if ch:
+                        s["shotRig"] = chart_shot_to_rig(ch, fps=24)
+                        s["performancePhases"] = {"ant_end": ch.get("ant_end"), "hold_start": ch.get("hold_start")}
+                    curve = curve_for_shot(camera_curves, s.get("shotId"))
+                    if curve:
+                        s["cameraCurve"] = curve
+                    tin = transition_in_for_shot(transition_edges, s.get("shotId"))
+                    if tin:
+                        s["transitionIn"] = tin
+                    expr_c = expression_curve_for_shot(acting_lead, performance_chart, s.get("shotId"))
+                    mouth_c = mouth_curve_for_shot(phoneme_sync, s.get("shotId"))
+                    merged = merge_mouth_into_expression_curve(expr_c, mouth_c)
+                    if merged:
+                        s["expressionCurve"] = merged
+            except Exception:
+                pass
+
+    if not frame_pipeline_state:
+        # Compute frame artifacts inline (backward-compatible path)
         try:
-            from tools.vo_audio import (
-                duration_frames_for_wav,
-                sync_vo_to_remotion_public,
-                vo_audio_event,
+            from agents.performance_chart_agent import (
+                chart_shot_to_rig,
+                run_performance_chart_agent,
             )
+            from agents.contact_lock_agent import run_contact_lock_agent
+            from agents.locomotion_cycle_agent import (
+                apply_locomotion_to_chart,
+                run_locomotion_cycle_agent,
+            )
+            from agents.camera_curve_agent import curve_for_shot, run_camera_curve_agent
+            from agents.transition_edge_agent import (
+                run_transition_edge_agent,
+                transition_in_for_shot,
+            )
+            from agents.foley_timeline_agent import (
+                merge_foley_into_audio_timeline,
+                run_foley_timeline_agent,
+            )
+            from agents.acting_lead_agent import (
+                apply_acting_lead_to_chart,
+                expression_curve_for_shot,
+                run_acting_lead_agent,
+            )
+            from agents.phoneme_sync_agent import (
+                merge_mouth_into_expression_curve,
+                mouth_curve_for_shot,
+                run_phoneme_sync_agent,
+            )
+            from agents.compliance_frame_agent import run_compliance_frame_agent
+            from agents.audio_cue_agent import run_audio_cue_agent
+            from tools.audio_cues import build_audio_timeline_from_plan, sync_cues_to_remotion_public
+            from tools.frame_gate import run_frame_gate
 
-            for row in chart_input:
-                vp = str(row.get("vo_path") or "")
-                if vp and Path(vp).is_file():
-                    row["vo_duration_frames"] = duration_frames_for_wav(vp, fps=24)
-        except Exception:  # noqa: BLE001
-            pass
-        performance_chart = run_performance_chart_agent(chart_input, fps=24)
-        locomotion_cycles = run_locomotion_cycle_agent(
-            chart_input, performance_chart=performance_chart, fps=24
-        )
-        performance_chart = apply_locomotion_to_chart(performance_chart, locomotion_cycles)
-        contact_lock = run_contact_lock_agent(
-            chart_input, performance_chart=performance_chart, fps=24
-        )
-        acting_lead = run_acting_lead_agent(
-            chart_input, performance_chart=performance_chart, fps=24
-        )
-        performance_chart = apply_acting_lead_to_chart(performance_chart, acting_lead)
-        phoneme_sync = run_phoneme_sync_agent(chart_input, fps=24, lead_frames=2)
-        camera_curves = run_camera_curve_agent(chart_input, fps=24)
-        transition_edges = run_transition_edge_agent(
-            chart_input, continuity_graph=graph if isinstance(graph, dict) else None, fps=24
-        )
-        chart_by_id = {s.get("shot_id"): s for s in performance_chart.get("shots") or []}
-        for s in shots:
-            ch = chart_by_id.get(s.get("shotId"))
-            if ch:
-                s["shotRig"] = chart_shot_to_rig(ch, fps=24)
-                s["performancePhases"] = {
-                    "ant_end": ch.get("ant_end"),
-                    "hold_start": ch.get("hold_start"),
-                }
-            curve = curve_for_shot(camera_curves, s.get("shotId"))
-            if curve:
-                s["cameraCurve"] = curve
-            tin = transition_in_for_shot(transition_edges, s.get("shotId"))
-            if tin:
-                s["transitionIn"] = tin
-            expr_c = expression_curve_for_shot(
-                acting_lead, performance_chart, s.get("shotId")
-            )
-            mouth_c = mouth_curve_for_shot(phoneme_sync, s.get("shotId"))
-            merged = merge_mouth_into_expression_curve(expr_c, mouth_c)
-            if merged:
-                s["expressionCurve"] = merged
-        plan = run_audio_cue_agent(
-            chart_input,
-            fps=24,
-            emotion=str(style.get("emotion") or pace or "neutral"),
-            contacts=contact_lock.get("contacts"),
-        )
-        audio_timeline = build_audio_timeline_from_plan(plan, shots, fps=24)
-        foley_timeline = run_foley_timeline_agent(
-            chart_input, contacts=contact_lock.get("contacts"), fps=24
-        )
-        audio_timeline = merge_foley_into_audio_timeline(audio_timeline, foley_timeline)
-        # Append VO wav events (cursor = shot start)
-        try:
-            from tools.vo_audio import (
-                duration_frames_for_wav,
-                sync_vo_to_remotion_public,
-                vo_audio_event,
-            )
+            chart_input = []
+            for s in shots:
+                sfx = list(s.get("sfx") or [])
+                if not sfx:
+                    try:
+                        from agents.audio_cue_agent import load_audio_catalog
+                        from agents.sfx_plan import infer_sfx_events
+                        from tools.audio_cues import ensure_audio_cue_files
 
-            cursor = 0
-            events = list(audio_timeline.get("events") or [])
-            for row, s in zip(chart_input, shots):
-                vp = str(row.get("vo_path") or "")
-                dur = int(s.get("durationFrames") or 0)
-                if vp and Path(vp).is_file():
-                    rel = sync_vo_to_remotion_public(vp, shot_id=s.get("shotId"))
-                    ant = int(s.get("anticipationFrames") or 6)
-                    vdur = int(row.get("vo_duration_frames") or duration_frames_for_wav(vp, fps=24))
-                    events.append(
-                        vo_audio_event(
-                            shot_id=s.get("shotId"),
-                            start_frame=cursor + ant,
-                            file_rel=rel,
-                            duration_frames=vdur,
+                        ensure_audio_cue_files()
+                        sfx = infer_sfx_events(
+                            str(s.get("action") or ""),
+                            beat=str(s.get("storyBeat") or ""),
+                            catalog_cues=dict(load_audio_catalog().get("cues") or {}),
                         )
-                    )
-                    s["voFile"] = rel
-                    s["voDurationFrames"] = vdur
-                cursor += dur
-            audio_timeline["events"] = events
-        except Exception:  # noqa: BLE001
-            pass
-        sync_cues_to_remotion_public()
-        frame_gate = run_frame_gate(
-            {
-                "performanceChart": performance_chart,
-                "contactLock": contact_lock,
-                "locomotionCycles": locomotion_cycles,
-            },
-            strict=False,
-        )
-    except Exception:  # noqa: BLE001
-        performance_chart = None
-        contact_lock = None
-        locomotion_cycles = None
-        camera_curves = None
-        transition_edges = None
-        foley_timeline = None
-        acting_lead = None
-        phoneme_sync = None
-        compliance_frame = None
-        frame_gate = None
-        try:
-            from tools.audio_cues import build_audio_timeline, sync_cues_to_remotion_public
+                    except Exception:  # noqa: BLE001
+                        sfx = []
+                chart_input.append(
+                    {
+                        "shot_id": s.get("shotId"),
+                        "story_beat": s.get("storyBeat"),
+                        "pose": (s.get("craftHints") or {}).get("rig", {}).get("pose")
+                        or "idle",
+                        "expression": (s.get("craftHints") or {}).get("rig", {}).get(
+                            "expression"
+                        )
+                        or "neutral",
+                        "action": s.get("action"),
+                        "dialogue": s.get("dialogue") or "",
+                        "vo_path": s.get("voPath") or "",
+                        "duration_frames": s.get("durationFrames"),
+                        "anticipation_frames": s.get("anticipationFrames"),
+                        "hold_frames": s.get("holdFrames"),
+                        "camera": s.get("camera"),
+                        "camera_move": s.get("cameraMove"),
+                        "sfx": sfx,
+                    }
+                )
+            # Resolve VO wav durations before phoneme sync
+            try:
+                from tools.vo_audio import (
+                    duration_frames_for_wav,
+                    sync_vo_to_remotion_public,
+                    vo_audio_event,
+                )
 
-            audio_timeline = build_audio_timeline(shots, fps=24)
+                for row in chart_input:
+                    vp = str(row.get("vo_path") or "")
+                    if vp and Path(vp).is_file():
+                        row["vo_duration_frames"] = duration_frames_for_wav(vp, fps=24)
+            except Exception:  # noqa: BLE001
+                pass
+            performance_chart = run_performance_chart_agent(chart_input, fps=24)
+            locomotion_cycles = run_locomotion_cycle_agent(
+                chart_input, performance_chart=performance_chart, fps=24
+            )
+            performance_chart = apply_locomotion_to_chart(performance_chart, locomotion_cycles)
+            contact_lock = run_contact_lock_agent(
+                chart_input, performance_chart=performance_chart, fps=24
+            )
+            acting_lead = run_acting_lead_agent(
+                chart_input, performance_chart=performance_chart, fps=24
+            )
+            performance_chart = apply_acting_lead_to_chart(performance_chart, acting_lead)
+            phoneme_sync = run_phoneme_sync_agent(chart_input, fps=24, lead_frames=2)
+            camera_curves = run_camera_curve_agent(chart_input, fps=24)
+            transition_edges = run_transition_edge_agent(
+                chart_input, continuity_graph=graph if isinstance(graph, dict) else None, fps=24
+            )
+            chart_by_id = {s.get("shot_id"): s for s in performance_chart.get("shots") or []}
+            for s in shots:
+                ch = chart_by_id.get(s.get("shotId"))
+                if ch:
+                    s["shotRig"] = chart_shot_to_rig(ch, fps=24)
+                    s["performancePhases"] = {
+                        "ant_end": ch.get("ant_end"),
+                        "hold_start": ch.get("hold_start"),
+                    }
+                curve = curve_for_shot(camera_curves, s.get("shotId"))
+                if curve:
+                    s["cameraCurve"] = curve
+                tin = transition_in_for_shot(transition_edges, s.get("shotId"))
+                if tin:
+                    s["transitionIn"] = tin
+                expr_c = expression_curve_for_shot(
+                    acting_lead, performance_chart, s.get("shotId")
+                )
+                mouth_c = mouth_curve_for_shot(phoneme_sync, s.get("shotId"))
+                merged = merge_mouth_into_expression_curve(expr_c, mouth_c)
+                if merged:
+                    s["expressionCurve"] = merged
+            plan = run_audio_cue_agent(
+                chart_input,
+                fps=24,
+                emotion=str(style.get("emotion") or pace or "neutral"),
+                contacts=contact_lock.get("contacts"),
+            )
+            audio_timeline = build_audio_timeline_from_plan(plan, shots, fps=24)
+            foley_timeline = run_foley_timeline_agent(
+                chart_input, contacts=contact_lock.get("contacts"), fps=24
+            )
+            audio_timeline = merge_foley_into_audio_timeline(audio_timeline, foley_timeline)
+            # Append VO wav events (cursor = shot start)
+            try:
+                from tools.vo_audio import (
+                    duration_frames_for_wav,
+                    sync_vo_to_remotion_public,
+                    vo_audio_event,
+                )
+
+                cursor = 0
+                events = list(audio_timeline.get("events") or [])
+                for row, s in zip(chart_input, shots):
+                    vp = str(row.get("vo_path") or "")
+                    dur = int(s.get("durationFrames") or 0)
+                    if vp and Path(vp).is_file():
+                        rel = sync_vo_to_remotion_public(vp, shot_id=s.get("shotId"))
+                        ant = int(s.get("anticipationFrames") or 6)
+                        vdur = int(row.get("vo_duration_frames") or duration_frames_for_wav(vp, fps=24))
+                        events.append(
+                            vo_audio_event(
+                                shot_id=s.get("shotId"),
+                                start_frame=cursor + ant,
+                                file_rel=rel,
+                                duration_frames=vdur,
+                            )
+                        )
+                        s["voFile"] = rel
+                        s["voDurationFrames"] = vdur
+                    cursor += dur
+                audio_timeline["events"] = events
+            except Exception:  # noqa: BLE001
+                pass
             sync_cues_to_remotion_public()
-        except Exception:  # noqa: BLE001
-            audio_timeline = {
-                "schema": "audio_timeline#v1",
-                "fps": 24,
-                "events": [],
-                "totalFrames": 0,
-            }
+            frame_gate = run_frame_gate(
+                {
+                    "performanceChart": performance_chart,
+                    "contactLock": contact_lock,
+                    "locomotionCycles": locomotion_cycles,
+                },
+                strict=False,
+            )
+        except Exception as exc:  # noqa: BLE001
+            import traceback as _tb
+            _frame_agent_error = f"{type(exc).__name__}: {exc}"
+            _frame_agent_traceback = _tb.format_exc()[-800:]
+            performance_chart = None
+            contact_lock = None
+            locomotion_cycles = None
+            camera_curves = None
+            transition_edges = None
+            foley_timeline = None
+            acting_lead = None
+            phoneme_sync = None
+            compliance_frame = None
+            frame_gate = None
+            try:
+                from tools.audio_cues import build_audio_timeline, sync_cues_to_remotion_public
+
+                audio_timeline = build_audio_timeline(shots, fps=24)
+                sync_cues_to_remotion_public()
+            except Exception:  # noqa: BLE001
+                audio_timeline = {
+                    "schema": "audio_timeline#v1",
+                    "fps": 24,
+                    "events": [],
+                    "totalFrames": 0,
+                }
 
     layers_out: dict[str, str] | None = None
     if isinstance(character_layers, dict):
@@ -600,6 +628,8 @@ def write_story_composition_props(
         "frameGate": frame_gate,
         "shots": shots,
     }
+    if performance_chart is None:
+        props["_frameAgentWarning"] = _frame_agent_error
     try:
         from agents.compliance_frame_agent import run_compliance_frame_agent
 
@@ -638,215 +668,3 @@ def write_story_composition_props(
     return path
 
 
-def render_remotion(
-    out_dir: Path | str,
-    *,
-    props_path: Path | str | None = None,
-    composition_id: str = "StoryNarrative",
-    timeout_sec: float = 900.0,
-) -> dict[str, Any]:
-    """
-    Run ``npx remotion render`` locally → ``out_dir/render.mp4``.
-    """
-    if not remotion_ready():
-        raise RuntimeError(
-            "Remotion not installed. cd C:\\Users\\badri\\Story\\remotion && npm install"
-        )
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
-    dest = out / "render.mp4"
-    props = Path(props_path) if props_path else out / "story_props.json"
-    if not props.is_file():
-        raise FileNotFoundError(f"Missing story props: {props}")
-
-    # Remotion reads props via --props
-    cmd = [
-        *_remotion_cli_cmd(),
-        "render",
-        composition_id,
-        str(dest),
-        "--props",
-        str(props.resolve()),
-        "--log",
-        "error",
-    ]
-    env = os.environ.copy()
-    log_path = out / "remotion_render.log"
-    with log_path.open("w", encoding="utf-8") as log_f:
-        log_f.write("CMD: " + " ".join(cmd) + "\n\n")
-        log_f.flush()
-        proc = subprocess.run(
-            cmd,
-            cwd=str(_REMOTION),
-            stdout=log_f,
-            stderr=subprocess.STDOUT,
-            env=env,
-            timeout=timeout_sec,
-            shell=False,
-        )
-    if proc.returncode != 0 or not dest.is_file() or dest.stat().st_size <= 0:
-        tail = log_path.read_text(encoding="utf-8", errors="replace")[-2500:]
-        raise RuntimeError(f"Remotion failed (code={proc.returncode}):\n{tail}")
-    return {
-        "ok": True,
-        "backend": "remotion",
-        "render_mp4": str(dest.resolve()),
-        "props": str(props.resolve()),
-        "remotion_log": str(log_path.resolve()),
-    }
-
-
-def render_story(
-    brief: str,
-    out_dir: Path | str,
-    *,
-    quality: str = "light",
-    runtime_seconds: float | None = None,
-    prefer_remotion: bool | None = None,
-    ffmpeg: str | None = None,
-    storyboard: dict[str, Any] | None = None,
-    cinematography: dict[str, Any] | None = None,
-    timing: dict[str, Any] | None = None,
-    continuity: dict[str, Any] | None = None,
-    style_profile: dict[str, Any] | None = None,
-    character_path: str | Path | None = None,
-    character_rig: dict[str, Any] | None = None,
-    character_layers: dict[str, Any] | None = None,
-    slide_images: list[str | Path] | None = None,
-) -> dict[str, Any]:
-    """
-    Story-only: Pro → Remotion local; else Light slideshow draft.
-    """
-    use_remotion = prefer_remotion
-    if use_remotion is None:
-        use_remotion = str(quality).lower() == "pro" and remotion_ready()
-
-    out = Path(out_dir)
-    if character_rig is None and use_remotion:
-        try:
-            from tools.williams_character_bridge import enrich_character_rig
-        except ImportError:
-            from .williams_character_bridge import enrich_character_rig
-
-        character_rig = enrich_character_rig(job_dir=out)
-
-    if storyboard is None:
-        from tools.chapter_tools import split_chapters
-
-        chapters = split_chapters(
-            brief, total_seconds=runtime_seconds, studio="story"
-        )
-        storyboard = {
-            "shots": [
-                {
-                    "shot_id": c.index,
-                    "title": c.title,
-                    "action": c.body,
-                    "duration_sec": c.seconds,
-                    "idea": c.body.splitlines()[0][:80] if c.body else c.title,
-                }
-                for c in chapters
-            ]
-        }
-
-    props = write_story_composition_props(
-        out,
-        storyboard=storyboard,
-        cinematography=cinematography,
-        timing=timing,
-        continuity=continuity,
-        style_profile=style_profile,
-        character_path=character_path,
-        character_rig=character_rig,
-        character_layers=character_layers,
-        title=(brief or "Story").splitlines()[0][:48] or "Story",
-    )
-
-    if use_remotion:
-        art = render_remotion(out, props_path=props)
-        art["style"] = "story_2d"
-        return art
-
-    try:
-        from tools.studio_profiles import find_ffmpeg
-        from runtime.light_slideshow import render_from_prompt
-    except ImportError:
-        from .studio_profiles import find_ffmpeg
-        from ..runtime.light_slideshow import render_from_prompt
-
-    ff = ffmpeg or find_ffmpeg()
-    if not ff:
-        if remotion_ready():
-            art = render_remotion(out, props_path=props)
-            art["style"] = "story_2d"
-            return art
-        raise RuntimeError("Need FFmpeg (light) or Remotion (pro) for Story")
-
-    shots = list(storyboard.get("shots") or [])
-    images = list(slide_images or [])
-    if character_path and Path(character_path).is_file():
-        images = [Path(character_path), *images]
-
-    try:
-        from tools.chapter_concat import DEFAULT_BATCH_SHOTS, chunk_shots, concat_mp4s
-    except ImportError:
-        from .chapter_concat import DEFAULT_BATCH_SHOTS, chunk_shots, concat_mp4s
-
-    # Long-form: batch Light slides then FFmpeg-concat parts → render.mp4
-    if len(shots) > DEFAULT_BATCH_SHOTS:
-        batches = chunk_shots(shots, batch_size=DEFAULT_BATCH_SHOTS)
-        parts_dir = out / "chapter_parts"
-        if parts_dir.exists():
-            import shutil
-
-            shutil.rmtree(parts_dir)
-        parts_dir.mkdir(parents=True, exist_ok=True)
-        part_mp4s: list[Path] = []
-        for bi, batch in enumerate(batches):
-            part_out = parts_dir / f"part_{bi:02d}"
-            part_out.mkdir(parents=True, exist_ok=True)
-            slides_brief = "\n\n".join(
-                f"{s.get('title', '')}\n{s.get('action', '')}".strip() for s in batch
-            ) or brief
-            # Pair images by global shot index when available
-            batch_images: list[Path] = []
-            for s in batch:
-                sid = s.get("shot_id")
-                if isinstance(sid, int) and sid < len(images):
-                    batch_images.append(Path(images[sid]))
-            part_art = render_from_prompt(
-                slides_brief,
-                part_out,
-                ffmpeg=str(ff),
-                quality="light",
-                studio="story",
-                slide_images=batch_images or None,
-            )
-            part_mp4s.append(Path(str(part_art["render_mp4"])))
-        final = concat_mp4s(part_mp4s, out / "render.mp4", ffmpeg=str(ff))
-        return {
-            "ok": True,
-            "backend": "light_slideshow_concat",
-            "style": "story_draft",
-            "render_mp4": str(final),
-            "props": str(props.resolve()),
-            "parts": [str(p) for p in part_mp4s],
-            "batches": len(batches),
-        }
-
-    slides_brief = "\n\n".join(
-        f"{s.get('title', '')}\n{s.get('action', '')}".strip() for s in shots
-    ) or brief
-    art = render_from_prompt(
-        slides_brief,
-        out,
-        ffmpeg=str(ff),
-        quality=quality if quality in {"light", "pro"} else "light",
-        studio="story",
-        slide_images=images,
-    )
-    art["ok"] = True
-    art["backend"] = "light_slideshow"
-    art["style"] = "story_draft"
-    art["props"] = str(props.resolve())
-    return art

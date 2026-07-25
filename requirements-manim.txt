@@ -1,2 +1,0 @@
-# Optional Pro backend
-manim>=0.18.0,<0.20.0

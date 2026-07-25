@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 try:
     from tools.chapter_tools import chapters_to_jsonable, split_chapters
@@ -43,6 +44,37 @@ AGENT_ORDER = (
     "AnimationTimingAgent",
     "ContinuityAgent",
 )
+
+
+async def _run_parallel(*tasks: Callable[[], Any]) -> list[Any]:
+    """Execute independent functions in parallel using ThreadPoolExecutor."""
+    with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
+        futures = [executor.submit(task) for task in tasks]
+        # Return results in original task order (not completion order)
+        return [f.result() for f in futures]
+
+
+def _run_parallel_sync(*tasks: Callable[[], Any]) -> list[Any]:
+    """Execute independent sync functions in parallel using ThreadPoolExecutor.
+    
+    Safer than asyncio.run() - avoids event loop conflicts in Streamlit/notebooks.
+    Falls back to sequential if only 1 task.
+    Returns results in ORIGINAL task order (not completion order).
+    """
+    if len(tasks) <= 1:
+        return [task() for task in tasks]
+    
+    try:
+        with ThreadPoolExecutor(max_workers=min(len(tasks), 4)) as executor:
+            # Submit all tasks
+            futures = [executor.submit(task) for task in tasks]
+            # Get results in original order by iterating futures in order
+            results = [f.result() for f in futures]
+            return results
+    except Exception as e:
+        # Fallback to sequential on any error
+        print(f"Warning: Parallel execution failed ({e}), falling back to sequential")
+        return [task() for task in tasks]
 
 _VERB_RE = re.compile(
     r"\b(enters?|leaves?|exits?|runs?|walks?|looks?|sees?|finds?|reacts?|"
@@ -290,6 +322,20 @@ def run_animation_timing(
     Why: NotebookLM distill in ``libraries/williams`` must set anticipation/hold
     and camera/lens — not remain dead JSON beside the Remotion path.
     """
+    # Map expressions to motion intensity (0.0=minimal, 1.0=maximal energy)
+    emotion_intensity_map = {
+        "sad": 0.2,
+        "tired": 0.2,
+        "neutral": 0.5,
+        "calm": 0.4,
+        "happy": 0.7,
+        "excited": 1.0,
+        "angry": 0.9,
+        "afraid": 0.8,
+        "confused": 0.5,
+        "surprised": 0.9,
+    }
+    
     rows = []
     for sh in storyboard.get("shots") or []:
         sec = float(sh.get("duration_sec") or 3.0)
@@ -297,6 +343,11 @@ def run_animation_timing(
         phases = sh.get("action_phases") or _action_phases(sec, fps=fps)
         ant = int(phases[0]["frame_end"]) if phases else 6
         hold = max(8, frames - int(phases[-1]["frame_start"])) if phases else 12
+        
+        # Get emotion and calculate intensity
+        emotion = str(sh.get("expression", "neutral")).lower()
+        emotion_intensity = emotion_intensity_map.get(emotion, 0.5)
+        
         rows.append(
             {
                 "shot_id": sh.get("shot_id"),
@@ -304,6 +355,8 @@ def run_animation_timing(
                 "duration_frames": frames,
                 "hold_frames": hold,
                 "anticipation_frames": ant,
+                "emotion": emotion,
+                "emotion_intensity": emotion_intensity,
             }
         )
     timing: dict[str, Any] = {
@@ -490,10 +543,10 @@ def revise_for_target(
         script_breakdown = run_script_breakdown_agent(screenplay, brief=brief)
         storyboard = run_storyboard(brief, breakdown=script_breakdown)
         cinematography = run_cinematography(storyboard)
-        timing = run_animation_timing(
-            storyboard, fps=fps, cinematography=cinematography
+        timing, continuity = _run_parallel_sync(
+            lambda: run_animation_timing(storyboard, fps=fps, cinematography=cinematography),
+            lambda: run_continuity(storyboard, cinematography=cinematography),
         )
-        continuity = run_continuity(storyboard, cinematography=cinematography)
         notes.append(f"revision={revision_target}")
 
     elif revision_target == "StoryboardAgent":
@@ -557,10 +610,10 @@ def revise_for_target(
                 )
             storyboard = {**storyboard, "shots": new_shots, "revised": True}
         cinematography = run_cinematography(storyboard)
-        timing = run_animation_timing(
-            storyboard, fps=fps, cinematography=cinematography
+        timing, continuity = _run_parallel_sync(
+            lambda: run_animation_timing(storyboard, fps=fps, cinematography=cinematography),
+            lambda: run_continuity(storyboard, cinematography=cinematography),
         )
-        continuity = run_continuity(storyboard, cinematography=cinematography)
         notes.append("revision=StoryboardAgent")
 
     elif revision_target == "AnimationTimingAgent":
@@ -663,11 +716,14 @@ def run_craft_from_screenplay(
         from .script_breakdown_agent import run_script_breakdown_agent  # type: ignore
         from .style_recommender_agent import recommend_styles  # type: ignore
 
-    script_breakdown = run_script_breakdown_agent(screenplay, brief=cleaned)
-    style_recommendation = recommend_styles(
-        cleaned,
-        emotion=str(extras.get("emotion") or "neutral"),
-        current_style_id=extras.get("style_id"),
+    # OPTIMIZATION: Run style recommendation in parallel with breakdown
+    script_breakdown, style_recommendation = _run_parallel_sync(
+        lambda: run_script_breakdown_agent(screenplay, brief=cleaned),
+        lambda: recommend_styles(
+            cleaned,
+            emotion=str(extras.get("emotion") or "neutral"),
+            current_style_id=extras.get("style_id"),
+        ),
     )
     if not extras.get("style_id"):
         extras["style_id"] = style_recommendation["primary_style_id"]
@@ -675,11 +731,14 @@ def run_craft_from_screenplay(
     storyboard = run_storyboard(
         cleaned, runtime_seconds=runtime_f, breakdown=script_breakdown
     )
+    
+    # Run cinematography first (timing and continuity depend on it)
     cinematography = run_cinematography(storyboard)
-    timing = run_animation_timing(
-        storyboard, fps=24, cinematography=cinematography
+    # Then run timing and continuity in parallel with real cinematography
+    timing, continuity = _run_parallel_sync(
+        lambda: run_animation_timing(storyboard, fps=24, cinematography=cinematography),
+        lambda: run_continuity(storyboard, cinematography=cinematography),
     )
-    continuity = run_continuity(storyboard, cinematography=cinematography)
 
     llm_notes: list[str] = []
     try:
@@ -821,30 +880,36 @@ def run_craft_from_screenplay(
     # Williams timing enrich (Node) — optional, non-fatal
     try:
         from tools.williams_bridge import enrich_timing_with_williams
-
-        timing2 = enrich_timing_with_williams(timing, job_dir=Path(job_dir))
-        if timing2.get("williams_enriched"):
-            timing = timing2
-            llm_notes.append("williams=1")
-        else:
-            llm_notes.append("williams=skip")
-    except Exception:  # noqa: BLE001
-        llm_notes.append("williams=skip")
+    except ImportError:
+        llm_notes.append("williams=skip:import")
+    else:
+        try:
+            timing2 = enrich_timing_with_williams(timing, job_dir=Path(job_dir))
+            if timing2.get("williams_enriched"):
+                timing = timing2
+                llm_notes.append("williams=1")
+            else:
+                llm_notes.append("williams=skip")
+        except Exception as exc:  # noqa: BLE001
+            llm_notes.append(f"williams=error:{type(exc).__name__}")
 
     character_rig: dict[str, Any] = {}
     try:
         from tools.williams_character_bridge import enrich_character_rig
-
-        character_rig = enrich_character_rig(
-            emotion=str(extras.get("emotion") or "neutral"),
-            job_dir=Path(job_dir),
-        )
-        if character_rig.get("williams_character"):
-            llm_notes.append("character_rig=1")
-        else:
-            llm_notes.append("character_rig=idle")
-    except Exception:  # noqa: BLE001
-        llm_notes.append("character_rig=skip")
+    except ImportError:
+        llm_notes.append("character_rig=skip:import")
+    else:
+        try:
+            character_rig = enrich_character_rig(
+                emotion=str(extras.get("emotion") or "neutral"),
+                job_dir=Path(job_dir),
+            )
+            if character_rig.get("williams_character"):
+                llm_notes.append("character_rig=1")
+            else:
+                llm_notes.append("character_rig=idle")
+        except Exception as exc:  # noqa: BLE001
+            llm_notes.append(f"character_rig=error:{type(exc).__name__}")
 
     chapters_payload = chapters_to_jsonable(
         split_chapters(cleaned, total_seconds=runtime_f, studio="story")

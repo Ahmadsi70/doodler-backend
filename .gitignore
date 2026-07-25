@@ -26,4 +26,9 @@ test_input.json
 .runpod/
 node_modules/
 remotion/node_modules/
-out/  
+
+# Build artifacts
+out/
+*.zip
+output_*.mp4
+*.stub

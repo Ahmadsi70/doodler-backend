@@ -57,6 +57,12 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help="Comma engines: prompts,remotion,slideshow",
     )
+    p_exp2.add_argument(
+        "--export-level",
+        default="full",
+        choices=["lightweight", "full", "rendering"],
+        help="Export detail level: lightweight (fast), full (all artifacts), rendering (render-only)",
+    )
     p_exp2.add_argument("--render", action="store_true", help="Render MP4 after export (Phase E)")
     p_exp2.add_argument(
         "--code-only", action="store_true",

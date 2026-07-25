@@ -236,25 +236,29 @@ def run_story_supervisor(
     ):
         try:
             from tools.frame_gate import run_frame_gate
-
-            frame_report = run_frame_gate(
-                {
-                    "performanceChart": extras.get("performanceChart")
-                    or extras.get("performance_chart"),
-                    "contactLock": extras.get("contactLock")
-                    or extras.get("contact_lock"),
-                    "locomotionCycles": extras.get("locomotionCycles")
-                    or extras.get("locomotion_cycles"),
-                },
-                strict=False,
-            )
-            findings.extend(list(frame_report.get("findings") or [])[:8])
-            if not frame_report.get("passed"):
-                passed = False
-                score = round(min(score, float(frame_report.get("score") or 0.4)), 3)
-                revision = revision or _TARGET_TIMING
-        except Exception:  # noqa: BLE001
-            frame_report = None
+        except ImportError:
+            findings.append("frame_gate:skip:import")
+        else:
+            try:
+                frame_report = run_frame_gate(
+                    {
+                        "performanceChart": extras.get("performanceChart")
+                        or extras.get("performance_chart"),
+                        "contactLock": extras.get("contactLock")
+                        or extras.get("contact_lock"),
+                        "locomotionCycles": extras.get("locomotionCycles")
+                        or extras.get("locomotion_cycles"),
+                    },
+                    strict=False,
+                )
+                findings.extend(list(frame_report.get("findings") or [])[:8])
+                if not frame_report.get("passed"):
+                    passed = False
+                    score = round(min(score, float(frame_report.get("score") or 0.4)), 3)
+                    revision = revision or _TARGET_TIMING
+            except Exception as exc:  # noqa: BLE001
+                findings.append(f"frame_gate:error:{type(exc).__name__}")
+                frame_report = None
     report = StorySupervisorReport(
         passed=passed,
         score=score,

@@ -1,13 +1,13 @@
 """
-DeepSeek LLM via OpenAI-compatible APIs.
+LLM via OpenAI-compatible APIs.
 
 Providers (auto-detected from env):
-  1. OpenRouter  — OPENROUTER_API_KEY  → https://openrouter.ai/api/v1
-                   model: deepseek/deepseek-v4-pro
-  2. DeepSeek    — DEEPSEEK_API_KEY    → https://api.deepseek.com
-                   model: deepseek-v4-pro
+  1. OpenAI     — OPENAI_API_KEY    → https://api.openai.com/v1
+                  model: gpt-4o
+  2. DeepSeek   — DEEPSEEK_API_KEY  → https://api.deepseek.com
+                  model: deepseek-v4-pro
 
-Force provider with LLM_PROVIDER=openrouter|deepseek
+Force provider with LLM_PROVIDER=openai|deepseek
 """
 
 from __future__ import annotations
@@ -33,10 +33,10 @@ AGENT_TEMPERATURES: dict[str, float] = {
     "emitter": 0.00,
 }
 
-ProviderName = Literal["openrouter", "deepseek"]
+ProviderName = Literal["openai", "deepseek"]
 
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-OPENROUTER_DEFAULT_MODEL = "deepseek/deepseek-v4-pro"
+OPENAI_BASE_URL = "https://api.openai.com/v1"
+OPENAI_DEFAULT_MODEL = "gpt-4o"
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_DEFAULT_MODEL = "deepseek-v4-pro"
@@ -48,56 +48,66 @@ def _env(name: str) -> str | None:
 
 
 def resolve_provider() -> ProviderName | None:
-    """Pick OpenRouter or DeepSeek from env. Prefer OpenRouter when its key is set."""
+    """Pick OpenAI or DeepSeek from env. Prefer OpenAI when its key is set."""
     forced = (_env("LLM_PROVIDER") or "").lower()
-    has_or = bool(_env("OPENROUTER_API_KEY"))
+    has_oa = bool(_env("OPENAI_API_KEY"))
     has_ds = bool(_env("DEEPSEEK_API_KEY"))
 
-    if forced in {"openrouter", "or"}:
-        return "openrouter" if has_or else None
+    if forced in {"openai", "oa"}:
+        return "openai" if has_oa else None
     if forced in {"deepseek", "ds", "direct"}:
         return "deepseek" if has_ds else None
 
-    # Auto: OpenRouter first (common for Iran / unified billing), else DeepSeek direct
-    if has_or:
-        return "openrouter"
+    # Auto: OpenAI first
+    if has_oa:
+        return "openai"
     if has_ds:
         return "deepseek"
     return None
 
 
 def deepseek_api_key() -> str | None:
-    """Backward-compatible: any usable LLM key (OpenRouter or DeepSeek)."""
+    """Backward-compatible: any usable LLM key (OpenAI or DeepSeek)."""
     provider = resolve_provider()
-    if provider == "openrouter":
-        return _env("OPENROUTER_API_KEY")
+    if provider == "openai":
+        return _env("OPENAI_API_KEY")
     if provider == "deepseek":
         return _env("DEEPSEEK_API_KEY")
-    return _env("OPENROUTER_API_KEY") or _env("DEEPSEEK_API_KEY")
+    return _env("OPENAI_API_KEY") or _env("DEEPSEEK_API_KEY")
 
 
 def deepseek_configured() -> bool:
     return resolve_provider() is not None
 
 
-def _normalize_openrouter_model(model: str) -> str:
-    """Map short DeepSeek names to OpenRouter slugs."""
+def _normalize_model(model: str) -> str:
+    """Normalize model name for the active provider."""
     m = model.strip()
     aliases = {
-        "deepseek-v4-pro": OPENROUTER_DEFAULT_MODEL,
-        "v4-pro": OPENROUTER_DEFAULT_MODEL,
-        "deepseek-chat": OPENROUTER_DEFAULT_MODEL,
+        "gpt-4o": "gpt-4o",
+        "gpt-4o-mini": "gpt-4o-mini",
+        "gpt-4": "gpt-4-turbo",
+        "deepseek-v4-pro": "deepseek-v4-pro",
+        "deepseek-chat": "deepseek/deepseek-v4-pro",
         "deepseek-v4-flash": "deepseek/deepseek-v4-flash",
-        "v4-flash": "deepseek/deepseek-v4-flash",
-        "deepseek-reasoner": "deepseek/deepseek-r1",
     }
-    if m in aliases:
-        return aliases[m]
-    if m.startswith("deepseek/") and m.count("/") == 1:
-        return m
-    if m.startswith("deepseek-") and "/" not in m:
-        return f"deepseek/{m}"
-    return m
+    return aliases.get(m, m)
+
+
+def select_model_for_role(role: str) -> str:
+    """
+    Select model based on role.
+    Fast roles use gpt-4o-mini; precision roles use gpt-4o.
+    Override with LLM_MODEL env var.
+    """
+    override = _env("LLM_MODEL")
+    if override:
+        return override
+    
+    fast_roles = {"breakdown", "style", "locomotion", "emitter"}
+    if role in fast_roles:
+        return "gpt-4o-mini"
+    return OPENAI_DEFAULT_MODEL  # gpt-4o
 
 
 def provider_config() -> dict[str, str]:
@@ -108,23 +118,23 @@ def provider_config() -> dict[str, str]:
     provider = resolve_provider()
     if provider is None:
         raise RuntimeError(
-            "No LLM API key configured. Set OPENROUTER_API_KEY (recommended) "
+            "No LLM API key configured. Set OPENAI_API_KEY "
             "or DEEPSEEK_API_KEY in .env — see .env.example."
         )
 
-    if provider == "openrouter":
-        key = _env("OPENROUTER_API_KEY")
+    if provider == "openai":
+        key = _env("OPENAI_API_KEY")
         if not key:
-            raise RuntimeError("LLM_PROVIDER=openrouter but OPENROUTER_API_KEY is empty")
+            raise RuntimeError("LLM_PROVIDER=openai but OPENAI_API_KEY is empty")
         raw_model = (
-            _env("OPENROUTER_MODEL")
-            or _env("DEEPSEEK_MODEL")
-            or OPENROUTER_DEFAULT_MODEL
+            _env("OPENAI_MODEL")
+            or _env("LLM_MODEL")
+            or OPENAI_DEFAULT_MODEL
         )
-        model = _normalize_openrouter_model(raw_model)
-        base = (_env("OPENROUTER_BASE_URL") or OPENROUTER_BASE_URL).rstrip("/")
+        model = _normalize_model(raw_model)
+        base = (_env("OPENAI_BASE_URL") or OPENAI_BASE_URL).rstrip("/")
         return {
-            "provider": "openrouter",
+            "provider": "openai",
             "api_key": key,
             "base_url": base,
             "model": model,
@@ -134,8 +144,6 @@ def provider_config() -> dict[str, str]:
     if not key:
         raise RuntimeError("LLM_PROVIDER=deepseek but DEEPSEEK_API_KEY is empty")
     model = _env("DEEPSEEK_MODEL") or DEEPSEEK_DEFAULT_MODEL
-    if model.startswith("deepseek/") and model.count("/") == 1:
-        model = model.split("/", 1)[1]
     base = (_env("DEEPSEEK_BASE_URL") or DEEPSEEK_BASE_URL).rstrip("/")
     return {
         "provider": "deepseek",
@@ -146,7 +154,7 @@ def provider_config() -> dict[str, str]:
 
 
 def get_openai_compatible_client() -> Any:
-    """OpenAI SDK pointed at OpenRouter or DeepSeek."""
+    """OpenAI SDK pointed at OpenAI or DeepSeek."""
     cfg = provider_config()
     try:
         from openai import OpenAI
@@ -155,18 +163,9 @@ def get_openai_compatible_client() -> Any:
             "Install the openai package: pip install openai>=1.40.0"
         ) from exc
 
-    default_headers: dict[str, str] = {}
-    if cfg["provider"] == "openrouter":
-        # Optional ranking headers (OpenRouter docs)
-        referer = _env("OPENROUTER_HTTP_REFERER") or "https://github.com/williams-glebas/animation-engine"
-        title = _env("OPENROUTER_APP_TITLE") or "Story Narrative Tool"
-        default_headers["HTTP-Referer"] = referer
-        default_headers["X-Title"] = title
-
     return OpenAI(
         api_key=cfg["api_key"],
         base_url=cfg["base_url"],
-        default_headers=default_headers or None,
     )
 
 
@@ -210,8 +209,6 @@ def chat_completion(
         "temperature": temp,
         "max_tokens": max(max_tokens, 128),
     }
-    if cfg["provider"] == "openrouter" or "deepseek" in cfg["model"].lower():
-        create_kwargs["extra_body"] = {"thinking": {"type": "disabled"}}
 
     response = client.chat.completions.create(**create_kwargs)
     choice = response.choices[0].message

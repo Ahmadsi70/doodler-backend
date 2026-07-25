@@ -7,12 +7,22 @@ must derive from screenplay beats, not raw brief paragraphs alone.
 
 from __future__ import annotations
 
+import hashlib
 from typing import Any
 
 try:
     from tools.chapter_tools import split_chapters
 except ImportError:
     from ..tools.chapter_tools import split_chapters  # type: ignore
+
+
+_screenplay_cache: dict[str, dict[str, Any]] = {}
+
+
+def _cache_key(brief: str, runtime_seconds: float | None = None) -> str:
+    """Generate cache key from brief and runtime."""
+    content = f"{brief}:{runtime_seconds}"
+    return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 
 def run_draft_screenplay_agent(
@@ -22,6 +32,11 @@ def run_draft_screenplay_agent(
     title: str = "Story",
 ) -> dict[str, Any]:
     """Build draft screenplay scenes and markdown from a narrative brief."""
+    # OPTIMIZATION: Check cache first
+    cache_key = _cache_key(brief, runtime_seconds)
+    if cache_key in _screenplay_cache:
+        return _screenplay_cache[cache_key]
+    
     chapters = split_chapters(
         brief, total_seconds=runtime_seconds, studio="story"
     )
@@ -56,7 +71,7 @@ def run_draft_screenplay_agent(
                 "",
             ]
         )
-    return {
+    result = {
         "agent": "DraftScreenplayAgent",
         "version": "1",
         "title": title,
@@ -65,3 +80,6 @@ def run_draft_screenplay_agent(
         "screenplay_md": "\n".join(md_lines),
         "schema": "draft_screenplay_agent.md#v1",
     }
+    # OPTIMIZATION: Cache the result
+    _screenplay_cache[cache_key] = result
+    return result

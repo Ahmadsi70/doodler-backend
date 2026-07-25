@@ -1,22 +1,21 @@
 # Story / Narrative — complete dependency stack
-# ── Core ──
+# ── Core (Required) ──
 pydantic>=2.7.0,<3.0.0
 typing_extensions>=4.12.0
-streamlit>=1.32.0,<2.0.0
 python-dotenv>=1.0.0,<2.0.0
 
-# ── Image ──
+# ── API Server ──
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.12
+websockets>=12.0
+
+# ── Image Processing ──
 Pillow>=10.0.0,<12.0.0
-opencv-python-headless>=4.9.0
+opencv-python-headless>=4.9.0,<5.0.0
 
-# ── ML Models ──
-torch>=2.0.0
-torchvision>=0.15.0
-
-# ── AI / LLM ──
+# ── AI / LLM (Primary) ──
 openai>=1.40.0,<2.0.0
-google-generativeai>=0.7.0
-litellm>=1.40.0
 
 # ── LangGraph orchestration ──
 langgraph>=0.2.0
@@ -30,15 +29,14 @@ chromadb>=0.5.0
 librosa>=0.10.0
 soundfile>=0.12.0
 pydub>=0.25.0
-pyttsx3>=2.90
 gTTS>=2.5
 
 # ── Video ──
 ffmpeg-python>=0.2.0
 
-# ── Text / NLP ──
-hazm>=0.10.0
-sentence-transformers>=3.0.0
+# ── Text / NLP (Optional - install with: pip install -e ".[llm]" ) ──
+# hazm>=0.10.0
+# sentence-transformers>=3.0.0
 
 # ── Cache ──
 diskcache>=5.6
@@ -49,11 +47,20 @@ httpx>=0.27.0
 # ── Animation ──
 easing-functions>=1.0.0
 
-# ── Testing ──
+# ── Testing (Optional) ──
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
 pytest-cov>=5.0.0
 
-# ── Dev Tools ──
+# ── Dev Tools (Optional) ──
 ruff>=0.4.0
 mypy>=1.9.0
+
+# ── ML Models (Optional - for RunPod backend) ──
+# Uncomment if using image/audio generation:
+# torch>=2.0.0
+# torchvision>=0.15.0
+# diffusers>=0.25.0
+# accelerate>=0.25.0
+# scipy>=1.10.0
+# rembg>=2.0.0
