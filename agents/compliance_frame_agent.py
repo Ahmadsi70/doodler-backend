@@ -71,12 +71,34 @@ def run_compliance_frame_agent(
     if not contact_present:
         findings.append("compliance:contacts_missing_for_gait")
 
+    # Check contact→audio alignment for gait shots
+    audio_events = list((props.get("audioTimeline") or {}).get("events") or [])
+    contact_sounds_ok = True
+    gait_shots = [s for s in chart_shots if str(s.get("pose") or "").lower() in {"walk", "run"}]
+    if gait_shots and contacts:
+        footstep_frames = {
+            int(c["global_frame"])
+            for c in contacts
+            if str(c.get("kind") or "").startswith("foot")
+        }
+        audio_footstep_frames = {
+            int(e.get("startFrame") or 0)
+            for e in audio_events
+            if "foot" in str(e.get("cue") or "").lower()
+        }
+        if footstep_frames and audio_footstep_frames:
+            matched = sum(1 for f in footstep_frames if any(abs(f - af) <= 2 for af in audio_footstep_frames))
+            contact_sounds_ok = matched >= len(footstep_frames) * 0.5
+        if not contact_sounds_ok:
+            findings.append(f"compliance:contact_audio_mismatch:steps={len(footstep_frames)}:audio_matched={matched}")
+
     flags = {
         "fps_ok": fps_ok,
         "line_180_ok": line_180_ok,
         "eyeline_ok": eyeline_ok,
         "chart_present": chart_present,
         "contact_present": contact_present,
+        "contact_sounds_ok": contact_sounds_ok,
     }
     passed = all(flags.values())
     return {

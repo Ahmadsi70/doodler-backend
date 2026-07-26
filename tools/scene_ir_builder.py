@@ -374,6 +374,7 @@ def apply_frame_artifacts_to_scene_ir(
         compliance = compliance.model_copy(
             update={
                 "fps_is_24": bool(flags.get("fps_ok", True)),
+                "contact_sounds_match_contact_frames": bool(flags.get("contact_sounds_ok", True)),
                 "line_of_action_ok": bool(flags.get("line_180_ok", True)),
                 "eyeline_continuity_ok": bool(flags.get("eyeline_ok", True)),
                 "notes": "compliance_from_ComplianceFrameAgent",
