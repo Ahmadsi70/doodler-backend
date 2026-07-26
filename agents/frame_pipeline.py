@@ -457,7 +457,7 @@ def build_chart_input(shots: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "shot_id": s.get("shotId"),
             "story_beat": s.get("storyBeat"),
             "pose": (s.get("craftHints") or {}).get("rig", {}).get("pose") or "idle",
-            "expression": (s.get("craftHints") or {}).get("rig", {}).get("expression") or "neutral",
+            "expression": (s.get("craftHints") or {}).get("rig", {}).get("expression"),
             "action": s.get("action"),
             "dialogue": s.get("dialogue") or "",
             "vo_path": s.get("voPath") or "",

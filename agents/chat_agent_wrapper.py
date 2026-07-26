@@ -8,6 +8,7 @@ from typing import Any
 from chat.message_types import Attachment, MessageStatus
 from chat.chat_session import ChatSession
 from chat.agent_bus import AgentBus, AgentMode
+from tools.chapter_tools import extract_runtime_seconds
 
 
 def _extract_agent_json(session: ChatSession, agent_name: str) -> dict[str, Any]:
@@ -36,9 +37,12 @@ def _register_draft_screenplay(bus: AgentBus) -> None:
     from agents.draft_screenplay_agent import run_draft_screenplay_agent
 
     async def handler(user_input: str, session: ChatSession) -> list[dict[str, Any]]:
+        brief = user_input or session.brief
+        runtime_seconds = extract_runtime_seconds(brief) or session.metadata.get("runtime_seconds")
         result = run_draft_screenplay_agent(
-            user_input or session.brief,
+            brief,
             title=session.metadata.get("title", "Story"),
+            runtime_seconds=runtime_seconds,
         )
         session.current_phase = "screenplay"
         scenes_md = result.get("screenplay_md", "")
@@ -100,10 +104,12 @@ def _register_storyboard(bus: AgentBus) -> None:
     from agents.story_chain import run_storyboard
 
     async def handler(user_input: str, session: ChatSession) -> list[dict[str, Any]]:
+        brief = user_input or session.brief
         breakdown = _extract_agent_json(session, "ScriptBreakdown")
+        runtime_seconds = extract_runtime_seconds(brief) or session.metadata.get("runtime_seconds")
         result = run_storyboard(
-            user_input or session.brief,
-            runtime_seconds=None,
+            brief,
+            runtime_seconds=runtime_seconds,
             breakdown=breakdown if breakdown.get("shots") else None,
         )
         session.current_phase = "storyboard"
@@ -335,7 +341,7 @@ def _register_frame_pipeline(bus: AgentBus) -> None:
                 "holdFrames": s.get("hold_frames") or s.get("holdFrames") or 12,
                 "camera": s.get("camera") or "static",
                 "cameraMove": s.get("camera_move") or s.get("cameraMove") or {},
-                "craftHints": s.get("craftHints") or {"rig": {"pose": "idle", "expression": "neutral"}},
+                "craftHints": s.get("craftHints") or {"rig": {"pose": "idle"}},
                 "dialogue": s.get("dialogue") or "",
                 "voPath": s.get("vo_path") or s.get("voPath") or "",
                 "sfx": list(s.get("sfx") or []),

@@ -32,6 +32,17 @@ def _scale_joints(j: dict[str, float], scale: float) -> dict[str, float]:
     return out
 
 
+_BEAT_TO_EXPRESSION: dict[str, str] = {
+    "entrance": "worry",
+    "reveal": "shock",
+    "reaction": "shock",
+    "decision": "hope",
+    "conflict": "worry",
+    "exit": "hope",
+    "quiet_hold": "neutral",
+}
+
+
 def _bible_cycle(pose: str, expression: str) -> list[dict[str, Any]]:
     bible = load_performance_bible()
     pose_row = (bible.get("poses") or {}).get((pose or "idle").lower())
@@ -127,8 +138,8 @@ def _chart_one_shot(sh: dict[str, Any], *, fps: int) -> dict[str, Any]:
     hold_start = dur - hold
     ant_end = ant
     pose = str(sh.get("pose") or "idle")
-    expression = str(sh.get("expression") or "neutral")
     beat = str(sh.get("story_beat") or sh.get("storyBeat") or "decision")
+    expression = str(sh.get("expression")) if sh.get("expression") else _BEAT_TO_EXPRESSION.get(beat, "neutral")
 
     rest = joints_for_pose("idle", expression)
     peak = joints_for_pose(pose, expression)

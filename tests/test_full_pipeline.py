@@ -149,6 +149,13 @@ def main():
         print(f"  Shots: {len(sp.get('shots') or [])}")
         for key in ["performanceChart", "contactLock", "cameraCurves", "actingLead", "phonemeSync", "foleyTimeline", "frameGate"]:
             print(f"    {key}: {sp.get(key) is not None}")
+        acting = sp.get("actingLead") or {}
+        for s in (acting.get("shots") or []):
+            print(f"    Shot {s.get('shot_id')}: expression={s.get('expression')}, emotion={s.get('channels',{}).get('emotion')}")
+        # also check performance chart expressions
+        pc = sp.get("performanceChart") or {}
+        for s in (pc.get("shots") or []):
+            print(f"    Chart Shot {s.get('shot_id')}: expression={s.get('expression')}, beat={s.get('story_beat')}, channels_emotion={s.get('expression_channels',{}).get('emotion')}")
     else:
         print("  ❌ story_props NOT in session metadata")
 

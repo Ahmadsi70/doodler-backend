@@ -36,7 +36,7 @@ def split_chapters(
 
     parts = [p.strip() for p in re.split(r"\n\s*\n+", text) if p.strip()]
     if len(parts) < 2:
-        parts = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+        parts = [s.strip() for s in re.split(r"(?<=[.!?\u060c])\s*", text) if s.strip()]
     if not parts:
         parts = [text]
     parts = parts[:max_chapters]
@@ -62,6 +62,24 @@ def split_chapters(
             )
         )
     return chapters
+
+
+_DURATION_RE = re.compile(r"(\d+)\s*(?:ثانیه|second|sec)", re.IGNORECASE)
+
+
+def extract_runtime_seconds(text: str) -> float | None:
+    """Parse a Persian/English duration hint like \"۵ ثانیه‌ای\" → 5.0."""
+    if not text:
+        return None
+    m = _DURATION_RE.search(text)
+    if m:
+        # Convert Persian digits if needed
+        digits = m.group(1).translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹", "0123456789"))
+        try:
+            return float(digits)
+        except ValueError:
+            return None
+    return None
 
 
 def chapters_to_jsonable(chapters: Sequence[Chapter]) -> list[dict]:
