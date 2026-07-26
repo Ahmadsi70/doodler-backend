@@ -154,6 +154,71 @@
         "Use sudden opacity pops or fast scale squashes."
       ],
       "confidence": 0.95
+    },
+    {
+      "id": "victory_celebrate_decision",
+      "story_beat": "decision",
+      "williams_principles": [
+        "squash_stretch",
+        "exaggeration",
+        "secondary_action",
+        "slow_in_out"
+      ],
+      "camera": "motivated_push",
+      "lens": "action",
+      "timing": {
+        "anticipationFrames": 4,
+        "holdFrames": 12,
+        "actionBias": "slow_in"
+      },
+      "rig": {
+        "pose": "jump",
+        "expression": "happy"
+      },
+      "do": [
+        "Use a deep squat anticipation to store energy before the jump.",
+        "Launch upward with arms spreading wide in celebration.",
+        "Land softly with bent knees to absorb the impact.",
+        "Add a secondary fist-pump or head toss at the apex."
+      ],
+      "dont": [
+        "Keep the arms pinned to the sides during the jump.",
+        "Land stiff-legged without any give in the knees."
+      ],
+      "confidence": 0.88
+    },
+    {
+      "id": "aggressive_confront_conflict",
+      "story_beat": "conflict",
+      "williams_principles": [
+        "anticipation",
+        "squash_stretch",
+        "timing",
+        "exaggeration",
+        "solid_drawing"
+      ],
+      "camera": "static",
+      "lens": "action",
+      "timing": {
+        "anticipationFrames": 6,
+        "holdFrames": 8,
+        "actionBias": "fast_out"
+      },
+      "rig": {
+        "pose": "react",
+        "expression": "angry"
+      },
+      "do": [
+        "Use sharp, snappy timing with fast-out bias for aggressive impact.",
+        "Squash the character down deeply in anticipation before lunging forward.",
+        "Drive shoulders forward and rotate the head down defensively.",
+        "Hold the final frame briefly to let the hit register."
+      ],
+      "dont": [
+        "Use slow cushioning which kills the aggressive energy.",
+        "Keep the spine upright and rigid during the lunge."
+      ],
+      "confidence": 0.87
     }
   ]
 }

@@ -160,6 +160,20 @@ def expression_channels(expression: str) -> dict[str, float | str]:
             "eyesOpen": 0.75,
             "faceSy": -0.05,
         },
+        "happy": {
+            "emotion": "happy",
+            "brows": -0.35,
+            "mouth": 0.6,
+            "eyesOpen": 0.85,
+            "faceSy": 0.15,
+        },
+        "angry": {
+            "emotion": "angry",
+            "brows": -0.7,
+            "mouth": -0.4,
+            "eyesOpen": 0.7,
+            "faceSy": -0.1,
+        },
     }
     return dict(table.get(e) or table["neutral"])
 

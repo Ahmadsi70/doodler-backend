@@ -26,13 +26,14 @@ _TONE_RECIPES: dict[str, tuple[float, float, float, str]] = {
     "foley_hit_soft": (280.0, 0.2, 0.48, "foley"),
     "stinger_reveal": (523.0, 0.55, 0.3, "tone"),
     "silence_hold": (0.0, 0.4, 0.0, "silence"),
-    # Narrative silent-film stubs (replace later via import_cue_wav + CC0)
     "vocal_laugh": (420.0, 0.55, 0.38, "vocal"),
     "vocal_giggle": (520.0, 0.35, 0.32, "vocal"),
+    "vocal_cheer": (660.0, 0.7, 0.4, "vocal"),
     "whoosh_move": (180.0, 0.28, 0.36, "whoosh"),
     "prop_pickup": (310.0, 0.18, 0.4, "foley"),
     "cloth_rustle": (240.0, 0.22, 0.28, "whoosh"),
     "magic_sparkle": (880.0, 0.45, 0.28, "chime"),
+    "treasure_chime": (660.0, 0.35, 0.32, "chime"),
 }
 
 _BED_CUES = {"ambience_soft", "ambience_tense"}
@@ -71,8 +72,20 @@ _NARRATIVE_META: dict[str, dict[str, Any]] = {
     "magic_sparkle": {
         "role": "oneshot",
         "tags": ["magic", "sparkle", "reveal", "narrative", "procedural"],
-        "beats": ["reveal", "decision"],
+        "beats": ["reveal", "decision", "celebration"],
         "gain_db": -10,
+    },
+    "vocal_cheer": {
+        "role": "oneshot",
+        "tags": ["vocal", "cheer", "celebration", "narrative", "procedural"],
+        "beats": ["decision", "exit", "celebration", "triumph"],
+        "gain_db": -7,
+    },
+    "treasure_chime": {
+        "role": "oneshot",
+        "tags": ["chime", "treasure", "reveal", "narrative", "procedural"],
+        "beats": ["reveal", "decision", "celebration"],
+        "gain_db": -8,
     },
 }
 

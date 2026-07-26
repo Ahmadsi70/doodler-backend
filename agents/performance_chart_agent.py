@@ -36,10 +36,13 @@ _BEAT_TO_EXPRESSION: dict[str, str] = {
     "entrance": "worry",
     "reveal": "shock",
     "reaction": "shock",
-    "decision": "hope",
-    "conflict": "worry",
-    "exit": "hope",
+    "decision": "happy",
+    "conflict": "angry",
+    "exit": "happy",
     "quiet_hold": "neutral",
+    "celebration": "happy",
+    "sneak": "worry",
+    "triumph": "happy",
 }
 
 
