@@ -1,0 +1,17 @@
+.git/
+.gitignore
+.gitattributes
+.env
+*.md
+docs/
+out/
+test-output/
+notebooks/
+remotion/
+frontend/
+chat/
+agents/
+__pycache__/
+*.pyc
+.DS_Store
+models/
