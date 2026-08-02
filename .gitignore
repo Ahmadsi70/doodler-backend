@@ -4,31 +4,21 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
-venv/
-.env
 .venv/
-env.bak/
-venv.bak/
-
-# Models and data
-models/
-runpod_backend/models/
-runpod_backend/AnimatedDrawings/
-sfx_*.wav
-test_input.json
+venv/
+env/
+.env
+.env.*
+!.env.example
 
 # IDEs
 .vscode/
 .idea/
 
-# RunPod/Docker
-.runpod/
-node_modules/
-remotion/node_modules/
-
-# Build artifacts
+# Build / render artifacts
 out/
+.pytest_cache/
 *.zip
 output_*.mp4
 *.stub
+_vendor/
